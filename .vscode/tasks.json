@@ -1,0 +1,114 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+            {
+                "group": "build",
+                "type": "process",
+                "label": "BUILD: build",
+                "command": "dotnet",
+                "args": [
+                    "build",
+                    "--no-restore"
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "shared"
+                },
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "dependsOn": ["CLEAN"],
+                "group": "build",
+                "type": "process",
+                "label": "BUILD: RE-build",
+                "command": "dotnet",
+                "args": [
+                    "build",
+                    "--no-incremental",
+                    "--verbosity",
+                    "n",
+                    "--force"
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "shared"
+                },
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "group": "build",
+                "type": "process",
+                "label": "CLEAN",
+                "command": "dotnet",
+                "args": ["clean"],
+                "options": {
+                    "cwd": "${workspaceRoot}"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "shared"
+                },
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "dependsOn": ["BUILD: build"],
+                "group": "test",
+                "type": "process",
+                "label": "TEST",
+                "command": "dotnet",
+                "args": [
+                    "test",
+                    "--no-build",
+                    "--no-restore",
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "shared"
+                },
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "dependsOn": ["BUILD: build"],
+                "group": "test",
+                "type": "process",
+                "label": "TEST ALL (coverage)",
+                "command": "dotnet",
+                "args": [
+                    "test",
+                    "--no-restore",
+                    "--no-build",
+                    "/p:CollectCoverage=true",
+                    "/p:CoverletOutputFormat=lcov",
+                    "/p:CoverletOutput=${workspaceRoot}/lcov.info",
+                    "/p:Exclude=[xunit.*]*"
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}"
+                },
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": true,
+                    "panel": "shared"
+                },
+                "problemMatcher": "$msCompile"
+            }
+    ]
+}
