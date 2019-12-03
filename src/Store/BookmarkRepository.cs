@@ -284,7 +284,6 @@ namespace Store
 
         // internal logic && helpers
 
-        // take the given path and determine the "parent" folder and increment it
         async Task<bool> IncrementChildCount(string path, string username)
         {
             return await CalcChildCount(path, username, () => +1);
@@ -325,6 +324,7 @@ namespace Store
             return true;
         }
 
+        // decompose the path to path and name
         (string path, string folder, bool valid) PathAndFolder(string path)
         {
             var i = path.LastIndexOf("/");
@@ -370,9 +370,7 @@ namespace Store
 
         async Task<IEnumerable<NodeCount>> GetPathChildCount(string path, string username)
         {
-            // a native SQL query is utilized here by means of Dapper!
             var conn = _context.Database.GetDbConnection();
-            // the current tx might by null which is OK, when passed to dapper
             var currTx = _context.Database.CurrentTransaction?.GetDbTransaction();
 
             var q = @"SELECT i.path as path, count(i.id) as count FROM BOOKMARKS i WHERE i.path IN (
