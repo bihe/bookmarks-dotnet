@@ -8,11 +8,11 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "BUILD: build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Store.Tests/bin/Debug/netcoreapp3.0/Store.Tests.dll",
+            "program": "${workspaceFolder}/src/Api/bin/Debug/netcoreapp3.1/Api.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Store.Tests",
+            "cwd": "${workspaceFolder}/src/Api",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false
