@@ -64,7 +64,7 @@ namespace Api.Infrastructure
                     Type = "about:blank",
                     Title = $"error during request: {req}",
                     Status = 500,
-                    Detail = EX.Message
+                    Detail = errorMessage
                 };
                 var result = JsonSerializer.Serialize(error);
                 context.Response.ContentType = "application/json";
