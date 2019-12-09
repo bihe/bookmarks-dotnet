@@ -1,10 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using Bookmarks.Tests.Store.Fixtures;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Store;
 using Xunit;
 
-namespace Store.Tests
+namespace Bookmarks.Tests.Store
 {
     public class StoreTest : TestDbProvider
     {

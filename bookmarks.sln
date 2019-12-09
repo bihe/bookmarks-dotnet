@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{26740257-403
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store", "src\Store\Store.csproj", "{6A40AA0B-2E1E-4F77-A834-366EEF375CA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Store.Tests", "src\Store.Tests\Store.Tests.csproj", "{DB01FDF3-D0BB-45A7-86F2-D53823C06743}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookmarks.Tests", "test\Bookmarks.Tests\Bookmarks.Tests.csproj", "{DB01FDF3-D0BB-45A7-86F2-D53823C06743}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "src\Api\Api.csproj", "{CD3A6F15-E11D-4C6C-A921-B8DB101D0793}"
 EndProject

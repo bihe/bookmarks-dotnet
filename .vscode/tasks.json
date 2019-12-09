@@ -92,6 +92,7 @@
                 "command": "dotnet",
                 "args": [
                     "test",
+                    "${workspaceRoot}/test/Bookmarks.Tests/Bookmarks.Tests.csproj",
                     "--no-restore",
                     "--no-build",
                     "/p:CollectCoverage=true",

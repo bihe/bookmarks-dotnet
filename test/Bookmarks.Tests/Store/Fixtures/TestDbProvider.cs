@@ -2,8 +2,9 @@ using System;
 using System.Runtime.CompilerServices;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Store;
 
-namespace Store.Tests
+namespace Bookmarks.Tests.Store.Fixtures
 {
     public abstract class TestDbProvider : IDisposable
     {
