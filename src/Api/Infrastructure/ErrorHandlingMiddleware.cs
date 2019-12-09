@@ -26,12 +26,12 @@ namespace Api.Infrastructure
             }
             catch (Security.Exceptions.AuthorizationException)
             {
-                // this exception is handled by it's own middleare
+                // this exception is handled by it's own middleware
                 throw;
             }
             catch (Security.Exceptions.LoginChallengeException)
             {
-                // this exception is handled by it's own middleare
+                // this exception is handled by it's own middleware
                 throw;
             }
             catch (Exception EX)
