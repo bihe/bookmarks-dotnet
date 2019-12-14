@@ -9,13 +9,6 @@ namespace Api.Infrastructure.Security.Exceptions
     public class LoginChallengeException : Exception
     {
         /// <summary>
-        /// default
-        /// </summary>
-        public LoginChallengeException()
-            : base()
-        { }
-
-        /// <summary>
         /// ctor
         /// </summary>
         /// <param name="message"></param>

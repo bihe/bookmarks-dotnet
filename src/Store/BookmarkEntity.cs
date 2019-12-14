@@ -10,16 +10,16 @@ namespace Store
 
     public class BookmarkEntity
     {
-        public string Id { get; set; }
-        public string Path { get; set; }
-        public string DisplayName { get; set; }
-        public string Url { get; set; }
-        public int SortOrder { get; set; }
-        public ItemType Type { get; set; }
-        public string UserName { get; set; }
-        public DateTime Created { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Path { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+        public int SortOrder { get; set; } = 0;
+        public ItemType Type { get; set; } = ItemType.Node;
+        public string UserName { get; set; } = string.Empty;
+        public DateTime Created { get; set; } = DateTime.Now;
         public DateTime? Modified { get; set; }
-        public int ChildCount { get; set; }
+        public int ChildCount { get; set; } = 0;
 
         public override string ToString()
         {

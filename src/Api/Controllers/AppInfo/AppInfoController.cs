@@ -8,23 +8,23 @@ namespace Api.Controllers.Systeminfo
 {
     public class VersionInfo
     {
-        public string Version { get; set; }
-        public string BuildNumber { get; set; }
+        public string Version { get; set; } = string.Empty;
+        public string BuildNumber { get; set; } = string.Empty;
     }
 
     public class UserInfo
     {
-        public string DisplayName { get; set; }
-        public string UserId { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string[] Roles { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string[] Roles { get; set; } = new string[]{};
     }
 
     public class AppInfo
     {
-        public UserInfo UserInfo { get; set; }
-        public VersionInfo VersionInfo { get; set; }
+        public UserInfo UserInfo { get; set; } = new UserInfo();
+        public VersionInfo VersionInfo { get; set; } = new VersionInfo();
     }
 
     [Authorize]

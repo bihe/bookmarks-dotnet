@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Api.Infrastructure.Security.Middleware
 {
-    internal class LoginRedirectMiddleware
+    public class LoginRedirectMiddleware
     {
         private readonly RequestDelegate next;
         private readonly ILogger _logger;
@@ -17,7 +17,7 @@ namespace Api.Infrastructure.Security.Middleware
         {
             this.next = next;
             this._logger = logger;
-            _settings = settings?.Value;
+            _settings = settings?.Value ?? new JwtSettings();
         }
 
         public async Task Invoke(HttpContext context /* other scoped dependencies */)
@@ -53,7 +53,7 @@ namespace Api.Infrastructure.Security.Middleware
         }
     }
 
-    internal static class LoginHandlerMiddlewareExtension
+    public static class LoginHandlerMiddlewareExtension
     {
         internal static IApplicationBuilder UseLoginRedirectHandling(this IApplicationBuilder builder)
         {

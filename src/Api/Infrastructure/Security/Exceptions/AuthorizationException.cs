@@ -9,13 +9,6 @@ namespace Api.Infrastructure.Security.Exceptions
     public class AuthorizationException : Exception
     {
         /// <summary>
-        /// default
-        /// </summary>
-        public AuthorizationException()
-            : base()
-        { }
-
-        /// <summary>
         /// ctor
         /// </summary>
         /// <param name="message"></param>

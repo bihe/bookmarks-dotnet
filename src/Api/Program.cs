@@ -14,7 +14,7 @@ namespace Api
             CreateHostBuilder(args).Build().Run();
         }
 
-        static string Env;
+        static string Env = string.Empty;
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {

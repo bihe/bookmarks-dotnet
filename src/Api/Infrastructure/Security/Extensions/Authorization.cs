@@ -7,7 +7,7 @@ namespace Api.Infrastructure.Security.Extensions
 {
     public static class Authorization
     {
-        public static ClaimsPrincipal IsAuthorized(ClaimsPrincipal principal, Claim required, string issuer)
+        public static ClaimsPrincipal? IsAuthorized(ClaimsPrincipal principal, Claim required, string issuer)
         {
             var user = principal.Get();
 
