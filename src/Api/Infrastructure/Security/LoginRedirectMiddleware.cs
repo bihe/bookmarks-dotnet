@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Api.Infrastructure.Security.Middleware
+namespace Api.Infrastructure.Security
 {
     public class LoginRedirectMiddleware
     {

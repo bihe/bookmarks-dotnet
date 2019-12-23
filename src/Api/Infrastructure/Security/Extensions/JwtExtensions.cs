@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Builder;
 using Api.Infrastructure.Security.Exceptions;
-using Api.Infrastructure.Security.Middleware;
 
 namespace Api.Infrastructure.Security.Extensions
 {

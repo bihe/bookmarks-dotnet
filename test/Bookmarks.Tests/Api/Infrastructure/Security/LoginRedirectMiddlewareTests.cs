@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-using Api.Infrastructure.Security.Middleware;
 using Microsoft.Extensions.Options;
 using Api.Infrastructure.Security;
 using Api.Infrastructure.Security.Exceptions;
