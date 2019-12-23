@@ -16,7 +16,6 @@ namespace Bookmarks.Tests.Api.Infrastructure
         [InlineData(@"text/plain", "text/html", false)]
         public void TestContentNegotiation(string accept, string acceptable, bool result)
         {
-
             var headerDict = new HeaderDictionary();
             headerDict.Add(KeyValuePair.Create<string,StringValues>("Accept", accept));
             var mockRequest = new Mock<HttpRequest>();

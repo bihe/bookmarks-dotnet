@@ -23,8 +23,14 @@ namespace Api.Controllers.Systeminfo
 
     public class AppInfo
     {
-        public UserInfo UserInfo { get; set; } = new UserInfo();
-        public VersionInfo VersionInfo { get; set; } = new VersionInfo();
+        public AppInfo()
+        {
+            UserInfo = new UserInfo();
+            VersionInfo = new VersionInfo();
+        }
+
+        public UserInfo UserInfo { get; set; }
+        public VersionInfo VersionInfo { get; set; }
     }
 
     [Authorize]
