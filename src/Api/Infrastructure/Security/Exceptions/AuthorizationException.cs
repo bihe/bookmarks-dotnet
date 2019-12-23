@@ -15,13 +15,5 @@ namespace Api.Infrastructure.Security.Exceptions
         public AuthorizationException(string message)
             : base(message)
         { }
-
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="inner"></param>
-        public AuthorizationException(string message, Exception inner) : base(message, inner)
-        { }
     }
 }

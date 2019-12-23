@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Api.Infrastructure.Security.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -24,12 +25,7 @@ namespace Api.Infrastructure
             {
                 await next(context);
             }
-            catch (Security.Exceptions.AuthorizationException)
-            {
-                // this exception is handled by it's own middleware
-                throw;
-            }
-            catch (Security.Exceptions.LoginChallengeException)
+            catch(Exception ex) when (ex is AuthorizationException || ex is LoginChallengeException)
             {
                 // this exception is handled by it's own middleware
                 throw;

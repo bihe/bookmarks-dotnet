@@ -50,14 +50,18 @@ namespace Api.Infrastructure.Security.Extensions
             var uriA = new Uri(a);
             var uriB = new Uri(b);
 
+            // base uri comparison
             if (uriA.Scheme != uriB.Scheme ||
-                uriA.Port != uriB.Port)
+                uriA.Port != uriB.Port ||
+                uriA.Host != uriB.Host)
             {
                 return false;
             }
 
+            // compare paths
             if (NormalizePath(uriA.PathAndQuery) != NormalizePath(uriB.PathAndQuery))
                 return false;
+
             return true;
         }
 
