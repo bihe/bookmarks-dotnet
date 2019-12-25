@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Api.Infrastructure.Security;
 using Api.Infrastructure.Security.Extensions;
+using Store;
+using Microsoft.EntityFrameworkCore;
+using Api.Infrastructure.Persistence;
 
 namespace Api.Infrastructure
 {
@@ -26,12 +29,19 @@ namespace Api.Infrastructure
             services.Configure<JwtSettings>(jwtSection);
             var jwtSettings = jwtSection.Get<JwtSettings>();
 
+            // add repository
+            services.AddDbContextPool<BookmarkContext>(options => {
+                options.UseMySql(Configuration.GetConnectionString("BookmarksConnection"));
+            });
+
             services.AddJwtAuth(jwtSettings);
             services.AddControllers();
+
+            services.AddScoped<IBookmarkRepository, DbBookmarkRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BookmarkContext context)
         {
             if (env.IsDevelopment())
             {
@@ -48,6 +58,11 @@ namespace Api.Infrastructure
             {
                 endpoints.MapControllers();
             });
+
+            if (env.IsDevelopment())
+            {
+                context.Database.EnsureCreated();
+            }
         }
     }
 }

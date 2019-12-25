@@ -12,7 +12,7 @@ namespace Bookmarks.Tests.Store.Fixtures
 
         protected BookmarkContext SetupDbContext([CallerMemberName]string caller = "")
         {
-            _conn = new SqliteConnection("DataSource=/tmp/test.sql");
+            _conn = new SqliteConnection("Data Source=:memory:");
             _conn.Open();
 
             var options = new DbContextOptionsBuilder<BookmarkContext>()

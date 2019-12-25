@@ -4,21 +4,24 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Controllers.Systeminfo;
 using Api.Infrastructure;
+using Bookmarks.Tests.Api.Controller.Fixtures;
 using Bookmarks.Tests.Api.Integration;
 using FluentAssertions;
 using Xunit;
 
 namespace Bookmarks.Tests.Api.Controller
 {
-    public class AppInfoControllerTests
+    public class AppInfoControllerTests : IClassFixture<JwtFixtures>, IClassFixture<JsonFixtures>
     {
+        readonly JwtFixtures _jwt;
+        readonly JsonFixtures _json;
         const string AppInfoUrl = "/api/v1/appinfo";
-        const string JwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE4Nzc1MzIyMjEsImp0aSI6IjAxYzNiZTllLWVmZTItNGViMy04ZjUyLTQxMWRmZDI0NDFjNyIsImlhdCI6MTU3NjkyNzQyMSwiaXNzIjoibG9naW4uYmluZ2dsLm5ldCIsInN1YiI6ImEuYkBjLmRlIiwiVHlwZSI6ImxvZ2luLlVzZXIiLCJEaXNwbGF5TmFtZSI6IkRpc3BsYXlOYW1lIiwiRW1haWwiOiJhLmJAYy5kZSIsIlVzZXJJZCI6IlVzZXJJZCIsIlVzZXJOYW1lIjoiVXNlck5hbWUiLCJHaXZlbk5hbWUiOiJVc2VyIiwiU3VybmFtZSI6Ik5hbWUiLCJDbGFpbXMiOlsiYm9va21hcmtzfGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMHxBZG1pbjtVc2VyIl19.phhEJYyFIpNioH-68ypphKYS3gC373U1duHNhcupH2w";
 
-        JsonSerializerOptions jsonOpts = new JsonSerializerOptions
+        public AppInfoControllerTests(JwtFixtures jwt, JsonFixtures json)
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+            _jwt = jwt;
+            _json = json;
+        }
 
         [Fact]
         public async Task TestGetAppInfo()
@@ -31,7 +34,7 @@ namespace Bookmarks.Tests.Api.Controller
             var client = factory.CreateClient();
 
             // Act
-            client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse($"Bearer {JwtToken}");
+            client.DefaultRequestHeaders.Authorization = _jwt.AuthHeader;
             var response = await client.GetAsync(AppInfoUrl);
 
             // Assert
@@ -43,7 +46,7 @@ namespace Bookmarks.Tests.Api.Controller
                 .Be(HttpStatusCode.OK);
 
             var responseString = await response.Content.ReadAsStringAsync();
-            var item = JsonSerializer.Deserialize<AppInfo>(responseString, jsonOpts);
+            var item = JsonSerializer.Deserialize<AppInfo>(responseString, _json.JsonOpts);
             item.UserInfo.DisplayName
                 .Should()
                 .Be("DisplayName");

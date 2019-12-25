@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Store;
 
 namespace Bookmarks.Tests.Api.Integration
 {
@@ -32,7 +35,6 @@ namespace Bookmarks.Tests.Api.Integration
                 // Don't run IHostedServices when running as a test
                 services.RemoveAll(typeof(IHostedService));
                 Registrations?.Invoke(services);
-
             });
         }
     }
