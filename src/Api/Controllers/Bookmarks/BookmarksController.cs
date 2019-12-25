@@ -13,7 +13,7 @@ namespace Api.Controllers.Bookmarks
     [ApiController]
     [Produces("application/json")]
     [Route("/api/v1/bookmarks")]
-    public class BookmarksController : ControllerBase
+    public class BookmarksController : BaseController
     {
         readonly ILogger<BookmarksController> _logger;
         readonly IBookmarkRepository _repository;
@@ -37,12 +37,12 @@ namespace Api.Controllers.Bookmarks
 
             if (string.IsNullOrEmpty(bookmark.Path) || string.IsNullOrEmpty(bookmark.DisplayName))
             {
-                return Problem(
-                    $"Invalid request data supplied. Missing Path or DisplayName!",
-                    null,
-                    StatusCodes.Status400BadRequest,
-                    "InvalidRequestError",
-                    "about:blank");
+                return ProblemDetailsResult(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: Errors.InvalidRequestError,
+                    detail: $"Invalid request data supplied. Missing Path or DisplayName!",
+                    instance: HttpContext.Request.Path
+                );
             }
 
             try
@@ -71,12 +71,11 @@ namespace Api.Controllers.Bookmarks
             catch(Exception EX)
             {
                 _logger.LogError($"Could not create a new bookmark entry: {EX.Message}\nstack: {EX.StackTrace}");
-                return Problem(
-                        $"Could not create bookmark because of error: {EX.Message}",
-                        null,
-                        StatusCodes.Status500InternalServerError,
-                        "CreateBookmarksError",
-                        "about:blank");
+                return ProblemDetailsResult(
+                    detail: $"Could not create bookmark because of error: {EX.Message}",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: Errors.CreateBookmarksError,
+                    instance: HttpContext.Request.Path);
             }
         }
     }

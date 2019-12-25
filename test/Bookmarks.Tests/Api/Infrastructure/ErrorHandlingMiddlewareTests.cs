@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Api.Infrastructure;
 using Api.Infrastructure.Security.Exceptions;
 using FluentAssertions;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -37,7 +37,7 @@ namespace Bookmarks.Tests.Api.Infrastructure
             context.Response.Body.Seek(0, SeekOrigin.Begin);
             var reader = new StreamReader(context.Response.Body);
             var streamText = reader.ReadToEnd();
-            var pd = JsonSerializer.Deserialize<ProblemDetail>(streamText);
+            var pd = JsonSerializer.Deserialize<ProblemDetails>(streamText);
 
             // Assert
             pd.Type.Should().Be("about:blank");

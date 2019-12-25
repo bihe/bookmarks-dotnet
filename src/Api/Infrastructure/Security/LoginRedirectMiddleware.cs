@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Api.Infrastructure.Security.Exceptions;
 using Microsoft.AspNetCore.Builder;
@@ -35,6 +36,10 @@ namespace Api.Infrastructure.Security
             {
                 _logger.LogError($"Invalid authorization. Req [Method: {context.Request.Method}, Host: {context.Request.Host}, Path: {context.Request.Path}]");
                 await RedirectToMissingAuth(context, ex);
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

@@ -1,7 +1,9 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace Api.Controllers.Bookmarks
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ItemType
     {
         Node,

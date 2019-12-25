@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Api.Infrastructure.Security.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Api.Infrastructure
@@ -25,7 +26,12 @@ namespace Api.Infrastructure
             {
                 await next(context);
             }
-            catch(Exception ex) when (ex is AuthorizationException || ex is LoginChallengeException)
+            catch(AuthorizationException)
+            {
+                // this exception is handled by it's own middleware
+                throw;
+            }
+            catch(LoginChallengeException)
             {
                 // this exception is handled by it's own middleware
                 throw;
@@ -55,12 +61,13 @@ namespace Api.Infrastructure
                 }
 
                 // for every other case, we will return JSON errors
-                var error = new ProblemDetail
+                var error = new ProblemDetails
                 {
                     Type = "about:blank",
                     Title = $"error during request: {req}",
                     Status = 500,
-                    Detail = errorMessage
+                    Detail = errorMessage,
+                    Instance = "{httpReq.Scheme}://{httpReq.Host}{httpReq.Path}"
                 };
                 var result = JsonSerializer.Serialize(error);
                 context.Response.ContentType = "application/json";

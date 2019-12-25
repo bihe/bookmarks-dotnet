@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
@@ -14,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Store;
 using Xunit;
 
 using persistence = Store;
@@ -21,7 +23,7 @@ using persistence = Store;
 namespace Bookmarks.Tests.Api.Controller
 {
     public class BookmarksControllerTests : TestDbProvider, IClassFixture<ControllerFixtures>
-     {
+    {
         persistence.BookmarkContext _context = null;
         persistence.IBookmarkRepository _repo = null;
         readonly ControllerFixtures _fixtures;
@@ -40,25 +42,25 @@ namespace Bookmarks.Tests.Api.Controller
             _fixtures = fixtures;
         }
 
+        BookmarkModel BookMark => new BookmarkModel{
+                DisplayName = "Test",
+                Path = "/",
+                Type = global::Api.Controllers.Bookmarks.ItemType.Node,
+                Url = "http://a.b.c.de"
+            };
+
+        ILogger<BookmarksController> Logger => Mock.Of<ILogger<BookmarksController>>();
+
+
         [Fact]
         public async Task TestCreateBookmarks()
         {
             // Arrange
-            var logger = Mock.Of<ILogger<BookmarksController>>();
-            var controller = new BookmarksController(logger, _repo);
-
-            var bookmark = new BookmarkModel{
-                DisplayName = "Test",
-                Path = "/",
-                Type = ItemType.Node,
-                Url = "http://a.b.c.de"
-            };
-
-            // arrange
+            var controller = new BookmarksController(Logger, _repo);
             controller.ControllerContext = _fixtures.Context;
 
             // Act
-            var result = await controller.Create(bookmark);
+            var result = await controller.Create(BookMark);
 
             // Assert
             result
@@ -70,5 +72,126 @@ namespace Bookmarks.Tests.Api.Controller
                 .Should()
                 .Be((int)HttpStatusCode.Created);
         }
-     }
+
+        [Fact]
+        public async Task TestCreateBookmarks_MissingValues()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, _repo);
+            controller.ControllerContext = _fixtures.Context;
+            var bookmark = BookMark;
+            bookmark.Path = string.Empty;
+
+            // Act
+            var result = await controller.Create(bookmark);
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
+
+         [Fact]
+        public async Task TestCreateBookmarks_Exception()
+        {
+            // Arrange
+            var repo = new MockDBRepo();
+
+            var controller = new BookmarksController(Logger, repo);
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.Create(BookMark);
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.InternalServerError);
+            problem.Title
+                .Should()
+                .Be(Errors.CreateBookmarksError);
+        }
+
+        internal class MockDBRepo : persistence.IBookmarkRepository
+        {
+            public Task InUnitOfWorkAsync(Func<Task<bool>> atomicOperation)
+            {
+                throw new Exception("error!");
+            }
+
+            public Task<BookmarkEntity> Create(BookmarkEntity item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<bool> Delete(BookmarkEntity item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<bool> DeletePath(string path, string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<List<BookmarkEntity>> GetAllBookmarks(string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<BookmarkEntity> GetBookmarkById(string id, string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<List<BookmarkEntity>> GetBookmarksByName(string name, string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<List<BookmarkEntity>> GetBookmarksByPathStart(string startPath, string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<List<NodeCount>> GetChildCountOfPath(string path, string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<BookmarkEntity> GetFolderByPath(string path, string username)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<BookmarkEntity> Update(BookmarkEntity item)
+            {
+                throw new NotImplementedException();
+            }
+        }
+    }
 }
