@@ -37,6 +37,7 @@ namespace Api.Infrastructure
 
             services.AddJwtAuth(jwtSettings);
             services.AddControllers();
+            services.AddRazorPages();
 
             services.AddScoped<IBookmarkRepository, DbBookmarkRepository>();
 
@@ -73,6 +74,7 @@ namespace Api.Infrastructure
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
 
             if (env.IsDevelopment())
