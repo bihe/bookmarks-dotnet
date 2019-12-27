@@ -106,7 +106,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestCreateBookmarks_Exception()
         {
             // Arrange
-            var repo = new MockDBRepo();
+            var repo = new MockDBRepoException();
 
             var controller = new BookmarksController(Logger, repo);
             controller.ControllerContext = _fixtures.Context;
@@ -130,68 +130,13 @@ namespace Bookmarks.Tests.Api.Controller
                 .Should()
                 .Be(Errors.CreateBookmarksError);
         }
+    }
 
-        internal class MockDBRepo : persistence.IBookmarkRepository
+    internal class MockDBRepoException : MockDBRepo
+    {
+        public override Task<BookmarkEntity> Create(BookmarkEntity item)
         {
-            public Task InUnitOfWorkAsync(Func<Task<bool>> atomicOperation)
-            {
-                throw new Exception("error!");
-            }
-
-            public Task<BookmarkEntity> Create(BookmarkEntity item)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<bool> Delete(BookmarkEntity item)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<bool> DeletePath(string path, string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<List<BookmarkEntity>> GetAllBookmarks(string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<BookmarkEntity> GetBookmarkById(string id, string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<List<BookmarkEntity>> GetBookmarksByName(string name, string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<List<BookmarkEntity>> GetBookmarksByPathStart(string startPath, string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<List<NodeCount>> GetChildCountOfPath(string path, string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<BookmarkEntity> GetFolderByPath(string path, string username)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<BookmarkEntity> Update(BookmarkEntity item)
-            {
-                throw new NotImplementedException();
-            }
+            throw new Exception("error!");
         }
     }
 }

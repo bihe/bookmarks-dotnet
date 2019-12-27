@@ -1,8 +1,14 @@
+using System.Net.Mime;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
-    public abstract class BaseController : ControllerBase
+    [ApiController]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Produces(MediaTypeNames.Application.Json)]
+    public abstract class ApiBaseController : ControllerBase
     {
         const string ProblemDetailsContentType = "application/problem+json";
 

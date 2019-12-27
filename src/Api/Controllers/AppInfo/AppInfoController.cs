@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Api.Infrastructure.Security.Extensions;
+using Microsoft.AspNetCore.Http;
 
 namespace Api.Controllers.Systeminfo
 {
@@ -34,9 +35,7 @@ namespace Api.Controllers.Systeminfo
     }
 
     [Authorize]
-    [ApiController]
-    [Produces("application/json")]
-    public class AppInfoController : ControllerBase
+    public class AppInfoController : ApiBaseController
     {
         readonly ILogger<AppInfoController> _logger;
 
@@ -47,6 +46,7 @@ namespace Api.Controllers.Systeminfo
 
         [HttpGet]
         [Route("/api/v1/appinfo")]
+        [ProducesResponseType(typeof(AppInfo),StatusCodes.Status200OK)]
         public AppInfo Get()
         {
             var user = this.User.Get();

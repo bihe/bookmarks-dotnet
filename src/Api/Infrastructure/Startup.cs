@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Api.Infrastructure.Security;
 using Api.Infrastructure.Security.Extensions;
 using Store;
 using Microsoft.EntityFrameworkCore;
-using Api.Infrastructure.Persistence;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
+using System;
 
 namespace Api.Infrastructure
 {
@@ -38,6 +39,16 @@ namespace Api.Infrastructure
             services.AddControllers();
 
             services.AddScoped<IBookmarkRepository, DbBookmarkRepository>();
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Bookmarks API", Version = "v1" });
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,7 +63,12 @@ namespace Api.Infrastructure
             app.UseRouting();
             app.UseErrorHandling();
             app.UseJwtAuth();
+            app.UseSwagger();
             app.UseStaticFiles();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Bookmarks API V1");
+            });
 
             app.UseEndpoints(endpoints =>
             {

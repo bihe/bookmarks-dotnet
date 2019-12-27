@@ -1,4 +1,5 @@
 using System;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Api.Infrastructure.Security.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -10,10 +11,8 @@ using Store;
 namespace Api.Controllers.Bookmarks
 {
     [Authorize]
-    [ApiController]
-    [Produces("application/json")]
     [Route("/api/v1/bookmarks")]
-    public class BookmarksController : BaseController
+    public class BookmarksController : ApiBaseController
     {
         readonly ILogger<BookmarksController> _logger;
         readonly IBookmarkRepository _repository;
@@ -29,6 +28,8 @@ namespace Api.Controllers.Bookmarks
         /// </summary>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(typeof(Result<string>),StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Create([FromBody] BookmarkModel bookmark)
         {
             _logger.LogDebug($"Will try to create a new bookmark entry: {bookmark}");
@@ -48,7 +49,6 @@ namespace Api.Controllers.Bookmarks
             try
             {
                 var user = this.User.Get();
-
                 await _repository.InUnitOfWorkAsync(async () => {
                     var entity = await _repository.Create(new BookmarkEntity{
                         DisplayName = bookmark.DisplayName,

@@ -46,6 +46,7 @@ namespace Api.Infrastructure
         {
             if (ContentNegotiation.IsAcceptable(context.Request, "text/html"))
             {
+                // TODO: need of a razor page for errors
                 context.Response.Redirect("/Error");
                 context.Response.Cookies.Append(Constants.ERROR_COOKIE_NAME, EX.Message);
                 context.Response.StatusCode = 302;
