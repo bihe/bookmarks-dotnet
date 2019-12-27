@@ -98,7 +98,7 @@
                     "/p:CollectCoverage=true",
                     "/p:CoverletOutputFormat=lcov",
                     "/p:CoverletOutput=${workspaceRoot}/lcov.info",
-                    "/p:Exclude=[xunit.*]*"
+                    "/p:Exclude=[xunit.*]*%2c[Api.Views*]*"
                 ],
                 "options": {
                     "cwd": "${workspaceRoot}"
