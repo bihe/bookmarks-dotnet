@@ -1,68 +1,64 @@
 using System.Net;
-using System.Net.Http.Headers;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Controllers.Systeminfo;
 using Api.Infrastructure;
 using Bookmarks.Tests.Api.Controller.Fixtures;
 using Bookmarks.Tests.Api.Integration;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Store;
 using Xunit;
 
 namespace Bookmarks.Tests.Api.Controller
 {
-    public class AppInfoControllerTests : IClassFixture<JwtFixtures>, IClassFixture<JsonFixtures>
+    public class AppInfoControllerTests : IClassFixture<ControllerFixtures>
     {
-        readonly JwtFixtures _jwt;
-        readonly JsonFixtures _json;
+        readonly ControllerFixtures _controller;
         const string AppInfoUrl = "/api/v1/appinfo";
 
-        public AppInfoControllerTests(JwtFixtures jwt, JsonFixtures json)
+        public AppInfoControllerTests(ControllerFixtures controller)
         {
-            _jwt = jwt;
-            _json = json;
+            _controller = controller;
         }
 
+        ILogger<AppInfoController> Logger => Mock.Of<ILogger<AppInfoController>>();
+
         [Fact]
-        public async Task TestGetAppInfo()
+        public void TestGetAppInfo()
         {
             // Arrange
-            var factory = new CustomWebApplicationFactory<Startup>();
-            factory.Registrations = services => {
-                // services
-            };
-            var client = factory.CreateClient();
+            var controller = new AppInfoController(Logger);
+            controller.ControllerContext = _controller.Context;
 
             // Act
-            client.DefaultRequestHeaders.Authorization = _jwt.AuthHeader;
-            var response = await client.GetAsync(AppInfoUrl);
+            var appInfo = controller.Get();
 
             // Assert
-            response
+            appInfo
                 .Should()
                 .NotBeNull();
-            response.StatusCode
-                .Should()
-                .Be(HttpStatusCode.OK);
-
-            var responseString = await response.Content.ReadAsStringAsync();
-            var item = JsonSerializer.Deserialize<AppInfo>(responseString, _json.JsonOpts);
-            item.UserInfo.DisplayName
+            appInfo.UserInfo.DisplayName
                 .Should()
                 .Be("DisplayName");
-            item.UserInfo.UserName
+            appInfo.UserInfo.UserName
                 .Should()
                 .Be("UserName");
 
         }
 
-         [Fact]
+        [Fact]
         public async Task TestGetAppInfo_NoAuth()
         {
             // Arrange
             var factory = new CustomWebApplicationFactory<Startup>();
             factory.Registrations = services => {
                 // services
+                services.AddDbContextPool<BookmarkContext>(options => {
+                    options.UseSqlite("Data Source=:memory:");
+                });
             };
             var client = factory.CreateClient();
 

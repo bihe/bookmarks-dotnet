@@ -1,13 +1,10 @@
 using System;
-using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Store;
 
 namespace Bookmarks.Tests.Api.Integration
 {
@@ -20,8 +17,7 @@ namespace Bookmarks.Tests.Api.Integration
         public Action<IServiceCollection> Registrations { get; set; }
 
         public CustomWebApplicationFactory() : this(null)
-        {
-        }
+        {}
 
         public CustomWebApplicationFactory(Action<IServiceCollection> registrations = null)
         {
@@ -29,13 +25,14 @@ namespace Bookmarks.Tests.Api.Integration
         }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder.ConfigureTestServices(services =>
-            {
-                // Don't run IHostedServices when running as a test
-                services.RemoveAll(typeof(IHostedService));
-                Registrations?.Invoke(services);
-            });
+        {   builder
+                .UseEnvironment("Testing")
+                .ConfigureTestServices(services =>
+                {
+                    // Don't run IHostedServices when running as a test
+                    services.RemoveAll(typeof(IHostedService));
+                    Registrations?.Invoke(services);
+                });
         }
     }
 }
