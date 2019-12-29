@@ -7,11 +7,6 @@ namespace Bookmarks.Tests.Api.Controller
 {
     internal abstract class MockDBRepo : IBookmarkRepository
     {
-        public virtual Task InUnitOfWorkAsync(Func<Task<bool>> atomicOperation)
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual Task<BookmarkEntity> Create(BookmarkEntity item)
         {
             throw new NotImplementedException();
@@ -58,6 +53,11 @@ namespace Bookmarks.Tests.Api.Controller
         }
 
         public virtual Task<BookmarkEntity> GetFolderByPath(string path, string username)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual Task<(bool result, T value)> InUnitOfWorkAsync<T>(Func<Task<(bool result, T value)>> atomicOperation)
         {
             throw new NotImplementedException();
         }

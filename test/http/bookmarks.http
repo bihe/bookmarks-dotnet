@@ -1,0 +1,26 @@
+## api base-path
+@basepath = https://localhost:3001
+
+## define the bearer token
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE4Nzc1MzIyMjEsImp0aSI6IjAxYzNiZTllLWVmZTItNGViMy04ZjUyLTQxMWRmZDI0NDFjNyIsImlhdCI6MTU3NjkyNzQyMSwiaXNzIjoibG9naW4uYmluZ2dsLm5ldCIsInN1YiI6ImEuYkBjLmRlIiwiVHlwZSI6ImxvZ2luLlVzZXIiLCJEaXNwbGF5TmFtZSI6IkRpc3BsYXlOYW1lIiwiRW1haWwiOiJhLmJAYy5kZSIsIlVzZXJJZCI6IlVzZXJJZCIsIlVzZXJOYW1lIjoiVXNlck5hbWUiLCJHaXZlbk5hbWUiOiJVc2VyIiwiU3VybmFtZSI6Ik5hbWUiLCJDbGFpbXMiOlsiYm9va21hcmtzfGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMHxBZG1pbjtVc2VyIl19.phhEJYyFIpNioH-68ypphKYS3gC373U1duHNhcupH2w
+
+## ------------------------------------------------------------------------------------------------
+## bookmarks requests
+## ------------------------------------------------------------------------------------------------
+@bookmarks = api/v1/bookmarks
+
+## create a new bookmark
+POST {{basepath}}/{{bookmarks}} HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+	"displayName": "DisplayName",
+	"path": "/",
+	"type": "node",
+	"url": "http://a.b.c.de"
+}
+
+## read/get a bookmark
+GET {{basepath}}/{{bookmarks}}/8e136d49-f4f2-4be6-9b37-0e66caff10db HTTP/1.1
+Authorization: Bearer {{token}}

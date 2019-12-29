@@ -128,6 +128,18 @@ namespace Bookmarks.Tests.Store
                 });
             });
 
+            // failed update - unavalable path
+            await Assert.ThrowsAsync<InvalidOperationException>(() => {
+                return repo.Update(new BookmarkEntity{
+                    Id = bm.Id,
+                    DisplayName = bm.DisplayName + "_changed",
+                    Path = "/this/path/is/not/known",
+                    SortOrder = 10,
+                    Url = "http://new-url",
+                    UserName = bm.UserName
+                });
+            });
+
             // bookmark not found
             bm = await repo.Update(new BookmarkEntity{
                 Id = "some-id",
@@ -345,7 +357,7 @@ namespace Bookmarks.Tests.Store
             var itemId = NewId;
             await repo.InUnitOfWorkAsync(async () => {
                 // create a folder-hierarchy /A/B/C
-                await repo.Create(new BookmarkEntity{
+                var item = await repo.Create(new BookmarkEntity{
                     Id = itemId,
                     ChildCount = 0,
                     Created = DateTime.UtcNow,
@@ -357,7 +369,7 @@ namespace Bookmarks.Tests.Store
                     UserName = Username
                 });
                 // rollback the transaction
-                return false;
+                return (false, item);
             });
 
             var bm = await repo.GetBookmarkById(itemId, Username);
@@ -365,7 +377,7 @@ namespace Bookmarks.Tests.Store
 
             itemId = NewId;
             await Assert.ThrowsAsync<Exception>( () => {
-                return repo.InUnitOfWorkAsync(async () => {
+                return repo.InUnitOfWorkAsync<BookmarkEntity>(async () => {
                     // create a folder-hierarchy /A/B/C
                     await repo.Create(new BookmarkEntity{
                         Id = itemId,
@@ -389,7 +401,7 @@ namespace Bookmarks.Tests.Store
             itemId = NewId;
             await repo.InUnitOfWorkAsync(async () => {
                 // create a folder-hierarchy /A/B/C
-                await repo.Create(new BookmarkEntity{
+                var item = await repo.Create(new BookmarkEntity{
                     Id = itemId,
                     ChildCount = 0,
                     Created = DateTime.UtcNow,
@@ -400,7 +412,7 @@ namespace Bookmarks.Tests.Store
                     Url = "http://url",
                     UserName = Username
                 });
-                return true;
+                return (true, item);
             });
 
             bm = await repo.GetBookmarkById(itemId, Username);

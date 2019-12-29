@@ -14,7 +14,7 @@ namespace Store
     /// </summary>
     public interface IBookmarkRepository
     {
-        Task InUnitOfWorkAsync(Func<Task<bool>> atomicOperation);
+        Task<(bool result, T value)> InUnitOfWorkAsync<T>(Func<Task<(bool result,T value)>> atomicOperation);
 
         Task<List<BookmarkEntity>> GetAllBookmarks(string username);
         Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username);
@@ -44,20 +44,21 @@ namespace Store
             _context = context;
         }
 
-        public async Task InUnitOfWorkAsync(Func<Task<bool>> atomicOperation)
+        public async Task<(bool result, T value)> InUnitOfWorkAsync<T>(Func<Task<(bool result,T value)>> atomicOperation)
         {
             using (var tx = _context.Database.BeginTransaction())
             {
                 try
                 {
                     var opOutcome = await atomicOperation();
-                    if (!opOutcome)
+                    if (!opOutcome.result)
                     {
                         _logger.LogInformation($"The operation outcome was {opOutcome}; therefore a rollback was initiated!");
                         tx.Rollback();
-                        return;
+                        return opOutcome;
                     }
                     tx.Commit();
+                    return opOutcome;
                 }
                 catch (Exception EX)
                 {
@@ -90,7 +91,7 @@ namespace Store
                 if (!hierarchy.Where(path => path == item.Path).Any())
                 {
                     _logger.LogWarning($"cannot create the bookmark {item} because the parent path {item.Path} is not available!");
-                    throw new InvalidOperationException("cannot create item because of missing path hierarchy!");
+                    throw new InvalidOperationException($"cannot create item because of missing path hierarchy '{item.Path}'!");
                 }
             }
             _context.Bookmarks.Add(item);
@@ -122,6 +123,18 @@ namespace Store
             {
                 _logger.LogWarning($"could not find a bookmark the bookmark to update {item}");
                 return null;
+            }
+
+            // check that the parent-path is available. as this is a hierarchical structure this is quite tedious
+            // the solution is to query the whole hierarchy and check if the given path is there
+            if (item.Path != "/")
+            {
+                var hierarchy = await this.AvailablePaths(item.UserName);
+                if (!hierarchy.Where(path => path == item.Path).Any())
+                {
+                    _logger.LogWarning($"cannot create the bookmark {item} because the parent path {item.Path} is not available!");
+                    throw new InvalidOperationException($"cannot create item because of missing path hierarchy '{item.Path}'!");
+                }
             }
 
             // use the found bookmark and update it with the supplied values

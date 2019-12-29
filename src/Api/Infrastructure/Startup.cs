@@ -32,7 +32,7 @@ namespace Api.Infrastructure
             services.Configure<JwtSettings>(jwtSection);
             var jwtSettings = jwtSection.Get<JwtSettings>();
 
-            // add repository
+            // sloppy workaround to prevent mysql db connection in testing-scenarios
             if (CurrentEnvironment.EnvironmentName != "Testing")
             {
                 services.AddDbContextPool<BookmarkContext>(options => {
@@ -43,7 +43,7 @@ namespace Api.Infrastructure
             services.AddJwtAuth(jwtSettings);
             services.AddControllers();
             services.AddRazorPages();
-
+            // add repository: scoped because DBContext is also scoped
             services.AddScoped<IBookmarkRepository, DbBookmarkRepository>();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
