@@ -1,11 +1,13 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Api.Infrastructure.Security.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Store;
+using System.Linq;
 
 namespace Api.Controllers.Bookmarks
 {
@@ -36,12 +38,7 @@ namespace Api.Controllers.Bookmarks
         {
             if (string.IsNullOrEmpty(id))
             {
-                return ProblemDetailsResult(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    title: Errors.InvalidRequestError,
-                    detail: $"Invalid id supplid",
-                    instance: HttpContext.Request.Path
-                );
+                return InvalidArguments( $"Invalid id supplid");
             }
 
             _logger.LogDebug($"Try to fetch bookmark by id '{id}'");
@@ -60,16 +57,45 @@ namespace Api.Controllers.Bookmarks
                 );
             }
 
-            return Ok(new BookmarkModel {
-                ChildCount = bookmark.ChildCount,
-                Created = bookmark.Created,
-                DisplayName = bookmark.DisplayName,
-                Id = bookmark.Id,
-                Modified = bookmark.Modified,
-                Path = bookmark.Path,
-                SortOrder = bookmark.SortOrder,
-                Type = bookmark.Type == Store.ItemType.Folder ? ItemType.Folder : ItemType.Node,
-                Url = bookmark.Url
+            return Ok(ToModel(bookmark));
+        }
+
+        /// <summary>
+        /// get bookmarks by path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("find")]
+        [ProducesResponseType(typeof(ListResult<List<BookmarkModel>>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> GetBookmarksByPath([FromQuery] string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return InvalidArguments($"Invalid path supplid");
+            }
+
+            _logger.LogDebug($"Try to fetch bookmarks for path '{path}'");
+
+            var user = this.User.Get();
+            var bookmarks = await _repository.GetBookmarksByPath(path, user.Username);
+            if (bookmarks == null || bookmarks.Count == 0)
+            {
+                _logger.LogWarning($"could not get bookmark for path '{path}'");
+                return ProblemDetailsResult(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: Errors.NotFoundError,
+                    detail: $"No bookmarks found for path '{path}'.",
+                    instance: HttpContext.Request.Path
+                );
+            }
+            return Ok(new ListResult<List<BookmarkModel>>{
+                Success = true,
+                Value = ToModelList(bookmarks),
+                Count = bookmarks.Count,
+                Message = $"Found {bookmarks.Count} items."
             });
         }
 
@@ -87,12 +113,7 @@ namespace Api.Controllers.Bookmarks
 
             if (string.IsNullOrEmpty(bookmark.Path) || string.IsNullOrEmpty(bookmark.DisplayName))
             {
-                return ProblemDetailsResult(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    title: Errors.InvalidRequestError,
-                    detail: $"Invalid request data supplied. Missing Path or DisplayName!",
-                    instance: HttpContext.Request.Path
-                );
+                return InvalidArguments($"Invalid request data supplied. Missing Path or DisplayName!");
             }
 
             try
@@ -147,12 +168,7 @@ namespace Api.Controllers.Bookmarks
                 || string.IsNullOrEmpty(bookmark.Id)
                 )
             {
-                return ProblemDetailsResult(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    title: Errors.InvalidRequestError,
-                    detail: $"Invalid request data supplied. Missing ID, Path or DisplayName!",
-                    instance: HttpContext.Request.Path
-                );
+                return InvalidArguments($"Invalid request data supplied. Missing ID, Path or DisplayName!");
             }
 
             try
@@ -203,6 +219,100 @@ namespace Api.Controllers.Bookmarks
                     title: Errors.UpdateBookmarksError,
                     instance: HttpContext.Request.Path);
             }
+        }
+
+        /// <summary>
+        /// remove an existring bookmark entry
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("{id}")]
+        [ProducesResponseType(typeof(Result<string>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> Delete(string id)
+        {
+            _logger.LogDebug($"Will try to delete existing bookmark with ID '{id}'");
+
+            if (string.IsNullOrEmpty(id))
+            {
+                return InvalidArguments($"Invalid request data supplied. Missing ID!");
+            }
+
+            try
+            {
+                var user = this.User.Get();
+                var outcome = await _repository.InUnitOfWorkAsync<ActionResult>(async () => {
+                    var existing = await _repository.GetBookmarkById(id, user.Username);
+                    if (existing == null)
+                    {
+                        _logger.LogWarning($"Could not find a bookmark with the given ID '{id}'");
+                        return (true, ProblemDetailsResult(
+                            detail: $"No bookmark found by ID: {id}",
+                            statusCode: StatusCodes.Status404NotFound,
+                            title: Errors.NotFoundError,
+                            instance: HttpContext.Request.Path));
+                    }
+                    var ok = await _repository.Delete(existing);
+                    if (ok)
+                    {
+                        _logger.LogInformation($"Updated Bookmark with ID {id}");
+                        var result = new OkObjectResult(new Result<string> {
+                            Success = true,
+                            Message = $"Bookmark with ID '{existing.Id}' was deleted.",
+                            Value = existing.Id
+                        });
+                        return (ok, result);
+                    }
+                    return (false, ProblemDetailsResult(
+                            detail: $"Could not delete bookmark by ID: {id}",
+                            statusCode: StatusCodes.Status500InternalServerError,
+                            title: Errors.DeleteBookmarkError,
+                            instance: HttpContext.Request.Path));
+                });
+
+                return outcome.value;
+            }
+            catch(Exception EX)
+            {
+                _logger.LogError($"Could not delete the bookmark entry with ID '{id}': {EX.Message}\nstack: {EX.StackTrace}");
+                return ProblemDetailsResult(
+                    detail: $"Could not delete bookmark because of error: {EX.Message}",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: Errors.DeleteBookmarkError,
+                    instance: HttpContext.Request.Path);
+            }
+        }
+
+
+        List<BookmarkModel> ToModelList(List<BookmarkEntity> entities)
+        {
+            return entities.Select(x => ToModel(x)).ToList();
+        }
+
+        BookmarkModel ToModel(BookmarkEntity entity)
+        {
+            return new BookmarkModel {
+                ChildCount = entity.ChildCount,
+                Created = entity.Created,
+                DisplayName = entity.DisplayName,
+                Id = entity.Id,
+                Modified = entity.Modified,
+                Path = entity.Path,
+                SortOrder = entity.SortOrder,
+                Type = entity.Type == Store.ItemType.Folder ? ItemType.Folder : ItemType.Node,
+                Url = entity.Url
+            };
+        }
+
+        ObjectResult InvalidArguments(string message)
+        {
+            return ProblemDetailsResult(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: Errors.InvalidRequestError,
+                    detail: message,
+                    instance: HttpContext.Request.Path
+                );
         }
     }
 }

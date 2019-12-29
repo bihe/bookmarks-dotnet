@@ -1,18 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Api.Controllers.Bookmarks;
-using Api.Infrastructure;
 using Bookmarks.Tests.Api.Controller.Fixtures;
-using Bookmarks.Tests.Api.Integration;
 using Bookmarks.Tests.Store.Fixtures;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Store;
@@ -305,6 +299,167 @@ namespace Bookmarks.Tests.Api.Controller
                 .Be(Errors.UpdateBookmarksError);
         }
 
+        [Fact]
+        public async Task TestDeleteBookmarks()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.Delete("id");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var update = result.As<OkObjectResult>();
+
+            update.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+
+            var bookmarkResult = update.Value.As<Result<string>>();
+            bookmarkResult.Value
+                .Should()
+                .Be("id");
+        }
+
+        [Fact]
+        public async Task TestDeleteBookmarks_MissingId()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.Delete("");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
+
+        [Fact]
+        public async Task TestDeleteBookmarks_Exception()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.Delete("exception");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.InternalServerError);
+            problem.Title
+                .Should()
+                .Be(Errors.DeleteBookmarkError);
+        }
+
+        [Fact]
+        public async Task TestFindBookmarksByPath()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarksByPath("/");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Count
+                .Should()
+                .Be(2);
+        }
+
+        [Fact]
+        public async Task TestFindBookmarksByPath_MissingPath()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarksByPath("");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
+
+        [Fact]
+        public async Task TestFindBookmarksByPath_NoBookmarks()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarksByPath("no");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.NotFound);
+            problem.Title
+                .Should()
+                .Be(Errors.NotFoundError);
+        }
     }
 
     internal class MockDBRepoException : MockDBRepo
@@ -324,6 +479,41 @@ namespace Bookmarks.Tests.Api.Controller
             });
         }
 
+        public override async Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username)
+        {
+            return await Task.Run(() => {
+                if (path == "no")
+                {
+                    return new List<BookmarkEntity>();
+                }
+
+                return new List<BookmarkEntity> {
+                    new BookmarkEntity{
+                        ChildCount = 0,
+                        Created = DateTime.UtcNow,
+                        DisplayName = "DisplayName",
+                        Id = "id1",
+                        Path = "/",
+                        SortOrder = 0,
+                        Type = persistence.ItemType.Node,
+                        Url = "http://a.b.c.de",
+                        UserName = username
+                    },
+                     new BookmarkEntity{
+                        ChildCount = 0,
+                        Created = DateTime.UtcNow,
+                        DisplayName = "DisplayName",
+                        Id = "id2",
+                        Path = "/",
+                        SortOrder = 0,
+                        Type = persistence.ItemType.Node,
+                        Url = "http://a.b.c.de",
+                        UserName = username
+                    }
+                };
+            });
+        }
+
         public override async Task<BookmarkEntity> GetBookmarkById(string id, string username)
         {
             return await Task.Run(() => {
@@ -333,7 +523,7 @@ namespace Bookmarks.Tests.Api.Controller
                         ChildCount = 0,
                         Created = DateTime.UtcNow,
                         DisplayName = "DisplayName",
-                        Id = "id",
+                        Id = id,
                         Path = "/",
                         SortOrder = 0,
                         Type = persistence.ItemType.Node,
@@ -369,6 +559,17 @@ namespace Bookmarks.Tests.Api.Controller
                 }
                 return null;
             });
+        }
+
+        public override async Task<bool> Delete(BookmarkEntity item)
+        {
+             return await Task.Run(() => {
+                 if (item.Id == "exception")
+                 {
+                    throw new Exception("error");
+                 }
+                 return true;
+             });
         }
     }
 }

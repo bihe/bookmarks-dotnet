@@ -6,5 +6,6 @@ namespace Api.Controllers.Bookmarks
         public const string CreateBookmarksError = "CreateBookmarksError";
         public const string UpdateBookmarksError = "UpdateBookmarksError";
         public const string NotFoundError = "NotFoundError";
+        public const string DeleteBookmarkError = "DeleteBookmarkError";
     }
 }

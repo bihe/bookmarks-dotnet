@@ -6,4 +6,9 @@ namespace Api.Controllers.Bookmarks
         public string Message { get; set; } = string.Empty;
         public T? Value { get; set; }
     }
+
+    public class ListResult<T> : Result<T> where T : class
+    {
+        public int Count { get; set; }
+    }
 }
