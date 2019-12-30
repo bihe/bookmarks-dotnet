@@ -262,28 +262,28 @@ namespace Store
         public async Task<List<BookmarkEntity>> GetBookmarksByPathStart(string startPath, string username)
         {
             var q = from b in _context.Bookmarks where b.UserName.ToLower() == username.ToLower() && b.Path.StartsWith(startPath) select b;
-            q = q.OrderBy(b => b.SortOrder).OrderBy(b => b.DisplayName);
+            q = q.OrderByDescending(b => b.Type).ThenBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
             return await q.ToListAsync();
         }
 
         public async Task<List<BookmarkEntity>> GetAllBookmarks(string username)
         {
             var q = from b in _context.Bookmarks where b.UserName.ToLower() == username.ToLower() select b;
-            q = q.OrderBy(b => b.Path).OrderBy(b => b.SortOrder).OrderBy(b => b.DisplayName);
+            q = q.OrderByDescending(b => b.Type).ThenBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
             return await q.ToListAsync();
         }
 
         public async Task<List<BookmarkEntity>> GetBookmarksByName(string name, string username)
         {
             var q = from b in _context.Bookmarks where b.UserName.ToLower() == username.ToLower() && b.DisplayName == name select b;
-            q = q.OrderBy(b => b.SortOrder).OrderBy(b => b.DisplayName);
+            q = q.OrderByDescending(b => b.Type).ThenBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
             return await q.ToListAsync();
         }
 
         public async Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username)
         {
             var q = from b in _context.Bookmarks where b.UserName.ToLower() == username.ToLower() && b.Path == path select b;
-            q = q.OrderBy(b => b.SortOrder).OrderBy(b => b.DisplayName);
+            q = q.OrderByDescending(b => b.Type).ThenBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
             return await q.ToListAsync();
         }
 
@@ -361,13 +361,13 @@ namespace Store
                 UNION ALL
 
                 SELECT
-                    CASE ii.path
+                    concat(CASE ii.path
                         WHEN '/' THEN ''
                         ELSE ii.path
-                    END || '/' || ii.display_name AS path
+                    END, '/', ii.display_name) AS path
                 FROM BOOKMARKS ii WHERE
                     ii.type = 1 AND lower(ii.user_name) = @UserName
-                GROUP BY ii.path || '/' || ii.display_name";
+                GROUP BY concat(ii.path,'/',ii.display_name)";
 
         async Task<IEnumerable<string>> AvailablePaths(string username)
         {
