@@ -1,0 +1,71 @@
+.bookmarks_content {
+  padding-left: 0px;
+}
+
+.bookmarks_breadcrumb {
+  display: block;
+  padding: 10px;
+  font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+}
+
+.bookmarks_breadcrumb a.root {
+  font-weight: bold;
+}
+
+.bookmarks_breadcrumb a.root:hover {
+  cursor: pointer;
+}
+
+.bookmarks_list {
+  display: block;
+}
+
+.bookmark_item {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-top: solid 1px #999999;
+  background-color: #ffffff;
+}
+
+.bookmark_item:last-child {
+  border-bottom: solid 1px #999999;
+}
+
+a.bookmark_name {
+  font-weight: bold;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1.2em;
+}
+
+a.bookmark_folder {
+  font-weight: bold;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 1.2em;
+}
+
+a.bookmark_folder:hover {
+  cursor: pointer;
+}
+
+a.bookmark_url {
+  font-family: 'Source Code Pro', monospace;
+}
+
+.bookmark_actions {
+  float: right;
+  padding-right: 10px;
+}
+
+a.bookmark_actions {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.add {
+  cursor: pointer;
+  position: fixed;
+  bottom: 50px;
+  right: 30px;
+}

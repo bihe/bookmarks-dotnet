@@ -1,0 +1,46 @@
+<div class="bookmarks_content">
+    <div class="bookmarks_breadcrumb">
+
+      <span *ngFor="let p of pathElemets; let i = index">
+        <span *ngIf="p === '/'">
+          / <a class="root" (click)="gotoPath('/')">Root</a>
+        </span>
+        <span *ngIf="p !== '/' && i &lt; pathElemets.length - 1">
+          / <a class="root" (click)="gotoPath(absolutePaths[i])">{{ p }}</a>
+        </span>
+        <span *ngIf="p !== '/' && i === pathElemets.length - 1 ">
+          / {{ p }}
+        </span>
+      </span>
+
+    </div>
+
+    <div class="bookmarks_list">
+      <div class="bookmark_item" *ngIf="bookmarks.length === 0">
+        <i>no entries available</i>
+      </div>
+      <div class="bookmark_item" *ngFor="let item of bookmarks" id="{{ item.id }}">
+        <span *ngIf="item.type === 'Node'">
+         <i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;
+         <a href="{{ item.url}}" target="_blank" class="bookmark_name">{{ item.displayName }}</a>
+         [ URL: <a href="{{ item.url}}" target="_blank" class="bookmark_url">{{ item.url }}</a> ]
+        </span>
+        <span *ngIf="item.type === 'Folder'">
+          <i class="fa fa-folder-o" aria-hidden="true"></i>&nbsp;
+          <a class="bookmark_folder" (click)="gotoPath(currentPath + '/' + item.displayName)">{{ item.displayName }}</a>
+        </span>
+
+        <div class="bookmark_actions">
+          <a>...</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="add" >
+  <button mat-fab
+      color="accent"
+      (click)="addBookmark()">
+      <i class="fa fa-plus fa-2x" aria-hidden="true" matTooltip="Add a new bookmark" matTooltipPosition="before"></i>
+  </button>
+</div>
