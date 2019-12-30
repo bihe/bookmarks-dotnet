@@ -15,6 +15,11 @@ namespace Bookmarks.Tests.Store.Fixtures
             _conn = new SqliteConnection("Data Source=:memory:");
             _conn.Open();
 
+            _conn.CreateFunction("concat", (object[] args) => {
+                return string.Join("", args);
+            });
+
+
             var options = new DbContextOptionsBuilder<BookmarkContext>()
                 .UseSqlite(_conn)
                 .EnableSensitiveDataLogging(true)
