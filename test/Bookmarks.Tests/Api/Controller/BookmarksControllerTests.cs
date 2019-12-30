@@ -434,32 +434,6 @@ namespace Bookmarks.Tests.Api.Controller
                 .Be(Errors.InvalidRequestError);
         }
 
-        [Fact]
-        public async Task TestFindBookmarksByPath_NoBookmarks()
-        {
-            // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
-            controller.ControllerContext = _fixtures.Context;
-
-            // Act
-            var result = await controller.GetBookmarksByPath("no");
-
-            // Assert
-            result
-                .Should()
-                .NotBeNull();
-            var created = result.As<ObjectResult>();
-            var problem = (ProblemDetails)created.Value;
-            problem
-                .Should()
-                .NotBeNull();
-            problem.Status
-                .Should()
-                .Be((int)HttpStatusCode.NotFound);
-            problem.Title
-                .Should()
-                .Be(Errors.NotFoundError);
-        }
     }
 
     internal class MockDBRepoException : MockDBRepo

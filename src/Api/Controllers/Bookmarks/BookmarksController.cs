@@ -81,15 +81,9 @@ namespace Api.Controllers.Bookmarks
 
             var user = this.User.Get();
             var bookmarks = await _repository.GetBookmarksByPath(path, user.Username);
-            if (bookmarks == null || bookmarks.Count == 0)
+            if (bookmarks == null)
             {
-                _logger.LogWarning($"could not get bookmark for path '{path}'");
-                return ProblemDetailsResult(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: Errors.NotFoundError,
-                    detail: $"No bookmarks found for path '{path}'.",
-                    instance: HttpContext.Request.Path
-                );
+                bookmarks = new List<BookmarkEntity>();
             }
             return Ok(new ListResult<List<BookmarkModel>>{
                 Success = true,
@@ -308,11 +302,11 @@ namespace Api.Controllers.Bookmarks
         ObjectResult InvalidArguments(string message)
         {
             return ProblemDetailsResult(
-                    statusCode: StatusCodes.Status400BadRequest,
-                    title: Errors.InvalidRequestError,
-                    detail: message,
-                    instance: HttpContext.Request.Path
-                );
+                statusCode: StatusCodes.Status400BadRequest,
+                title: Errors.InvalidRequestError,
+                detail: message,
+                instance: HttpContext.Request.Path
+            );
         }
     }
 }
