@@ -408,6 +408,34 @@ namespace Bookmarks.Tests.Api.Controller
         }
 
         [Fact]
+        public async Task TestFindBookmarksByPath_NoResult()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarksByPath("no");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Count
+                .Should()
+                .Be(0);
+        }
+
+        [Fact]
         public async Task TestFindBookmarksByPath_MissingPath()
         {
             // Arrange
@@ -434,6 +462,88 @@ namespace Bookmarks.Tests.Api.Controller
                 .Be(Errors.InvalidRequestError);
         }
 
+        [Fact]
+        public async Task TestFindBookmarksByName()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarksByName("a");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Count
+                .Should()
+                .Be(2);
+        }
+
+        [Fact]
+        public async Task TestFindBookmarksByName_NoResult()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarksByName("no");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Count
+                .Should()
+                .Be(0);
+        }
+
+        [Fact]
+        public async Task TestFindBookmarksByName_MissingName()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarksByName("");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
     }
 
     internal class MockDBRepoException : MockDBRepo
@@ -453,12 +563,12 @@ namespace Bookmarks.Tests.Api.Controller
             });
         }
 
-        public override async Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username)
+        async Task<List<BookmarkEntity>> GetBookmarkList(string input, string username)
         {
             return await Task.Run(() => {
-                if (path == "no")
+                if (input == "no")
                 {
-                    return new List<BookmarkEntity>();
+                    return null;
                 }
 
                 return new List<BookmarkEntity> {
@@ -486,6 +596,16 @@ namespace Bookmarks.Tests.Api.Controller
                     }
                 };
             });
+        }
+
+        public override async Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username)
+        {
+            return await GetBookmarkList(path, username);
+        }
+
+        public override async Task<List<BookmarkEntity>> GetBookmarksByName(string name, string username)
+        {
+            return await GetBookmarkList(name, username);
         }
 
         public override async Task<BookmarkEntity> GetBookmarkById(string id, string username)

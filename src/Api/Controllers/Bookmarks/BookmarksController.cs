@@ -66,7 +66,7 @@ namespace Api.Controllers.Bookmarks
         /// <param name="path"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("find")]
+        [Route("bypath")]
         [ProducesResponseType(typeof(ListResult<List<BookmarkModel>>),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -81,6 +81,34 @@ namespace Api.Controllers.Bookmarks
 
             var user = this.User.Get();
             var bookmarks = await _repository.GetBookmarksByPath(path, user.Username);
+            if (bookmarks == null)
+            {
+                bookmarks = new List<BookmarkEntity>();
+            }
+            return Ok(new ListResult<List<BookmarkModel>>{
+                Success = true,
+                Value = ToModelList(bookmarks),
+                Count = bookmarks.Count,
+                Message = $"Found {bookmarks.Count} items."
+            });
+        }
+
+        [HttpGet]
+        [Route("byname")]
+        [ProducesResponseType(typeof(ListResult<List<BookmarkModel>>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> GetBookmarksByName([FromQuery] string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return InvalidArguments($"Invalid name supplid");
+            }
+
+            _logger.LogDebug($"Try to fetch bookmarks by name '{name}'");
+
+            var user = this.User.Get();
+            var bookmarks = await _repository.GetBookmarksByName(name, user.Username);
             if (bookmarks == null)
             {
                 bookmarks = new List<BookmarkEntity>();

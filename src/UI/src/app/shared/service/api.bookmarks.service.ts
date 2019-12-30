@@ -16,7 +16,16 @@ export class ApiBookmarksService extends BaseDataService {
   }
 
   getBookmarksForPath(path: string): Observable<ListResult<BookmarkModel[]>> {
-    const url = `${this.BASE_URL}/find?path=${path}`;
+    const url = `${this.BASE_URL}/bypath?path=${path}`;
+    return this.http.get<ListResult<BookmarkModel[]>>(url, this.RequestOptions)
+      .pipe(
+        timeout(this.RequestTimeOutDefault),
+        catchError(this.handleError)
+      );
+  }
+
+  getBookmarksByName(name: string): Observable<ListResult<BookmarkModel[]>> {
+    const url = `${this.BASE_URL}/byname?name=${name}`;
     return this.http.get<ListResult<BookmarkModel[]>>(url, this.RequestOptions)
       .pipe(
         timeout(this.RequestTimeOutDefault),

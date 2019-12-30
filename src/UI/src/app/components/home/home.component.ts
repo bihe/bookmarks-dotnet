@@ -21,6 +21,8 @@ export class HomeComponent implements OnInit {
   pathElemets: string[] = [];
   absolutePaths: string[] = [];
   isAdmin: boolean = false;
+  search: string = '';
+  searchMode: boolean = false;
 
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
@@ -68,6 +70,7 @@ export class HomeComponent implements OnInit {
       path = path.replace('//', '/'); // fix for the root path!
     }
     console.log('goto: ' + path);
+    this.searchMode = false;
     this.getBookmarksForPath(path);
   }
 
@@ -200,6 +203,31 @@ export class HomeComponent implements OnInit {
         );
       }
     });
+  }
+
+  searchBookmarks() {
+    console.log('search for ' + this.search);
+    this.state.setProgress(true);
+    this.bookmarksService.getBookmarksByName(this.search)
+      .subscribe(
+        data => {
+          this.state.setProgress(false);
+          if (data.count > 0) {
+            this.bookmarks = data.value;
+            this.searchMode = true;
+            this.currentPath = '/';
+            this.pathElemets = this.splitPathElements(this.currentPath);
+            this.search = '';
+          } else {
+            this.bookmarks = [];
+          }
+        },
+        error => {
+          this.state.setProgress(false);
+          console.log('Error: ' + error);
+          new MessageUtils().showError(this.snackBar, error);
+        }
+      );
   }
 
   private splitPathElements(path: string) : string[] {

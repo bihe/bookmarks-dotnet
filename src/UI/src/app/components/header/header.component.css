@@ -59,11 +59,12 @@ div.navinfo {
   padding-left: 15px;
   font-weight: bold;
   font-size: 18pt;
+  font-family: 'Source Code Pro', monospace;
 }
 
 .app-title {
-font-size: 1.5em;
-font-weight: bold;
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .link {
