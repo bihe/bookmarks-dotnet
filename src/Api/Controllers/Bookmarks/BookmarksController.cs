@@ -180,6 +180,27 @@ namespace Api.Controllers.Bookmarks
                             instance: HttpContext.Request.Path));
                     }
 
+                    var childCount = existing.ChildCount;
+                    if (existing.Type == Store.ItemType.Folder)
+                    {
+                        // on save of a folder, update the child-count!
+                        var parentPath = existing.Path;
+                        if (!parentPath.EndsWith("/"))
+                        {
+                            parentPath += "/";
+                        }
+                        var path = parentPath + existing.DisplayName;
+                        var nodeCounts = await _repository.GetChildCountOfPath(path, user.Username);
+                        if (nodeCounts != null && nodeCounts.Count > 0)
+                        {
+                            var nodeCount = nodeCounts.Find(x => x.Path == path);
+                            if (nodeCount != null)
+                            {
+                                childCount = nodeCount.Count;
+                            }
+                        }
+                    }
+
                     var item = await _repository.Update(new BookmarkEntity{
                         Id = bookmark.Id,
                         Created = existing.Created,
@@ -189,6 +210,7 @@ namespace Api.Controllers.Bookmarks
                         Type = existing.Type, // it does not make any sense to change the type of a bookmark!
                         Url = bookmark.Url,
                         UserName = user.Username,
+                        ChildCount = childCount
                     });
 
                     _logger.LogInformation($"Updated Bookmark with ID {id}");
@@ -247,6 +269,19 @@ namespace Api.Controllers.Bookmarks
                             title: Errors.NotFoundError,
                             instance: HttpContext.Request.Path));
                     }
+
+                    // if the element is a folder and there are child-elements
+                    // prevent the deletion - this can only be done via a recursive deletion like rm -rf
+                    if (existing.Type == Store.ItemType.Folder && existing.ChildCount > 0)
+                    {
+                        _logger.LogWarning($"Cannot delete folder-elements '{existing.Path}/{existing.DisplayName}' because the item has child-elements '{existing.ChildCount}!");
+                        return (false, ProblemDetailsResult(
+                            detail: $"Could not delete '{existing.DisplayName}' because of child-elements!",
+                            statusCode: StatusCodes.Status500InternalServerError,
+                            title: Errors.DeleteBookmarkError,
+                            instance: HttpContext.Request.Path));
+                    }
+
                     var ok = await _repository.Delete(existing);
                     if (ok)
                     {

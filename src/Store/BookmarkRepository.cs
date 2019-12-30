@@ -143,8 +143,9 @@ namespace Store
             bm.Path = item.Path;
             bm.SortOrder = item.SortOrder;
             bm.Url = item.Url;
+            bm.ChildCount = item.ChildCount;
 
-            // the properties ChildCount, Created, Type, UserName are not touched!
+            // the properties Created, Type, UserName are not touched!
 
             await _context.SaveChangesAsync();
 
