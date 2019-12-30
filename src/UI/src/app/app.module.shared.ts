@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
-import { MatDialogModule, MatFormFieldModule, MatInputModule, MatOptionModule, MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSnackBarModule, MatTooltipModule } from '@angular/material';
+import { MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatMenuModule, MatOptionModule, MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSnackBarModule, MatTooltipModule } from '@angular/material';
 import { MatButtonModule } from '@angular/material/button';
 import { AppComponent } from './components/app/app.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { HeaderComponent } from './components/header/header.component';
 import { CreateBookmarksDialog } from './components/home/create.dialog';
@@ -13,8 +14,8 @@ import { ApplicationState } from './shared/service/application.state';
 
 
 @NgModule({
-  imports: [ MatProgressSpinnerModule, MatTooltipModule, MatSnackBarModule, MatButtonModule, MatDialogModule, MatInputModule, MatFormFieldModule, MatRadioModule, MatOptionModule, MatSelectModule ],
-  exports: [ MatProgressSpinnerModule, MatTooltipModule, MatSnackBarModule, MatButtonModule, MatDialogModule, MatInputModule, MatFormFieldModule, MatRadioModule, MatOptionModule, MatSelectModule ],
+  imports: [ MatProgressSpinnerModule, MatTooltipModule, MatSnackBarModule, MatButtonModule, MatDialogModule, MatInputModule, MatFormFieldModule, MatRadioModule, MatOptionModule, MatSelectModule, MatMenuModule, MatIconModule ],
+  exports: [ MatProgressSpinnerModule, MatTooltipModule, MatSnackBarModule, MatButtonModule, MatDialogModule, MatInputModule, MatFormFieldModule, MatRadioModule, MatOptionModule, MatSelectModule, MatMenuModule, MatIconModule ],
 })
 export class AppMaterialModule { }
 
@@ -26,11 +27,12 @@ export const sharedConfig: NgModule = {
         FooterComponent,
         HeaderComponent,
         EllipsisPipe,
-        CreateBookmarksDialog
+        CreateBookmarksDialog,
+        ConfirmDialogComponent
     ],
     imports: [
         AppMaterialModule
     ],
     providers: [ ApplicationState, ApiAppInfoService, ApiBookmarksService ],
-    entryComponents: [ CreateBookmarksDialog ]
+    entryComponents: [ CreateBookmarksDialog, ConfirmDialogComponent ]
 };

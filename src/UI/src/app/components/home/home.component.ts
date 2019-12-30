@@ -6,6 +6,7 @@ import { ProblemDetail } from 'src/app/shared/models/error.problemdetail';
 import { ApplicationState } from 'src/app/shared/service/application.state';
 import { MessageUtils } from 'src/app/shared/utils/message.utils';
 import { ApiBookmarksService } from '../../shared/service/api.bookmarks.service';
+import { ConfirmDialogComponent, ConfirmDialogModel } from '../confirm-dialog/confirm-dialog.component';
 import { CreateBookmarksDialog } from './create.dialog';
 
 @Component({
@@ -19,6 +20,7 @@ export class HomeComponent implements OnInit {
   currentPath: string = '';
   pathElemets: string[] = [];
   absolutePaths: string[] = [];
+  isAdmin: boolean = false;
 
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
@@ -30,6 +32,12 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
     this.currentPath = '/';
     this.getBookmarksForPath(this.currentPath); // initial load
+
+    this.state.isAdmin().subscribe(
+      data => {
+       this.isAdmin = data;
+      }
+    );
   }
 
   getBookmarksForPath(path: string) {
@@ -63,6 +71,68 @@ export class HomeComponent implements OnInit {
     this.getBookmarksForPath(path);
   }
 
+  editBookmark(id: string) {
+    console.log('edit bookmark: ' + id);
+    this.bookmarksService.fetchBookmarkById(id).subscribe(
+      data => {
+        this.state.setProgress(false);
+        console.log(data);
+
+        const dialogRef = this.dialog.open(CreateBookmarksDialog, {
+          width: '50vw',
+          data: {
+            absolutePaths: this.absolutePaths,
+            currentPath: this.currentPath,
+            existingBookmark: data
+          }
+        });
+
+        dialogRef.afterClosed().subscribe(data => {
+          console.log('dialog was closed');
+          if (data.result) {
+            let bookmark:BookmarkModel = data.model;
+            console.log(bookmark);
+
+            // update the UI immediately!
+            let oldDisplayName = '';
+            let existing = this.bookmarks.find(x => x.id === bookmark.id);
+            if (existing) {
+              oldDisplayName = existing.displayName;
+              existing.displayName = bookmark.displayName;
+            }
+
+            this.bookmarksService.updateBookmark(bookmark).subscribe(
+              data => {
+                this.state.setProgress(false);
+                console.log(data);
+                if (data.success) {
+                  new MessageUtils().showSuccess(this.snackBar, data.message);
+                  this.getBookmarksForPath(this.currentPath);
+                }
+              },
+              error => {
+                if (oldDisplayName && existing) {
+                  existing.displayName = oldDisplayName;
+                }
+                const errorDetail: ProblemDetail = error;
+                this.state.setProgress(false);
+                console.log(errorDetail);
+                new MessageUtils().showError(this.snackBar, errorDetail.detail);
+              }
+            );
+          }
+        });
+
+      },
+      error => {
+        const errorDetail: ProblemDetail = error;
+        this.state.setProgress(false);
+        console.log(errorDetail);
+        new MessageUtils().showError(this.snackBar, errorDetail.detail);
+      }
+    );
+  }
+
   addBookmark() {
     console.log('add bookmark!');
     const dialogRef = this.dialog.open(CreateBookmarksDialog, {
@@ -79,7 +149,40 @@ export class HomeComponent implements OnInit {
         let bookmark:BookmarkModel = data.model;
         console.log(bookmark);
 
-        this.bookmarksService.saveBookmark(bookmark).subscribe(
+        this.bookmarksService.createBookmark(bookmark).subscribe(
+          data => {
+            this.state.setProgress(false);
+            console.log(data);
+            if (data.success) {
+              new MessageUtils().showSuccess(this.snackBar, data.message);
+              this.getBookmarksForPath(this.currentPath);
+            }
+          },
+          error => {
+            const errorDetail: ProblemDetail = error;
+            this.state.setProgress(false);
+            console.log(errorDetail);
+            new MessageUtils().showError(this.snackBar, errorDetail.detail);
+          }
+        );
+      }
+    });
+  }
+
+  deleteBookmark(id: string) {
+    const dialogData = new ConfirmDialogModel('Confirm delete!', 'Really delete bookmark?');
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      maxWidth: "400px",
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      console.log(dialogResult);
+      if (dialogResult === true) {
+        console.log('Will delete bookmark by id ' + id);
+
+        this.bookmarksService.deleteBookmarkById(id).subscribe(
           data => {
             this.state.setProgress(false);
             console.log(data);

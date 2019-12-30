@@ -69,3 +69,23 @@ a.bookmark_actions {
   bottom: 50px;
   right: 30px;
 }
+
+.bookmark_child_items {
+  height: 19px;
+  width: 19px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
+  text-align: center;
+  font-size: 0.7em;
+  color: white;
+  font-weight: bold;
+  position: relative;
+  left: 5px;
+  top: -4px;
+}
+
+.bookmark_index {
+  font-weight: bold;
+  color: #999999;
+}

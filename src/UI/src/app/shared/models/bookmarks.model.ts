@@ -1,16 +1,16 @@
 export enum ItemType {
-  Node = "node",
-  Folder = "folder"
+  Node = "Node",
+  Folder = "Folder"
 }
 
 export class BookmarkModel {
-  public Id: string;
-  public Path: string;
-  public DisplayName: string;
-  public Url: string;
-  public SortOrder: number;
-  public Type: ItemType;
-  public Created: Date;
-  public Modified: Date;
-  public ChildCound: number;
+  public id: string;
+  public path: string;
+  public displayName: string;
+  public url: string;
+  public sortOrder: number;
+  public type: ItemType;
+  public created: Date;
+  public modified: Date;
+  public childCount: number;
 }

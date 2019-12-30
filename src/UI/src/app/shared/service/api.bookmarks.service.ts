@@ -24,8 +24,34 @@ export class ApiBookmarksService extends BaseDataService {
       );
   }
 
-  saveBookmark(model: BookmarkModel): Observable<Result<string>> {
+  fetchBookmarkById(id: string): Observable<BookmarkModel> {
+    const url = `${this.BASE_URL}/${id}`;
+    return this.http.get<BookmarkModel>(url, this.RequestOptions)
+      .pipe(
+        timeout(this.RequestTimeOutDefault),
+        catchError(this.handleError)
+      );
+  }
+
+  createBookmark(model: BookmarkModel): Observable<Result<string>> {
     return this.http.post<Result<string>>(this.BASE_URL, model, this.RequestOptions)
+      .pipe(
+        timeout(this.RequestTimeOutDefault),
+        catchError(this.handleError)
+      );
+  }
+
+  deleteBookmarkById(id: string): Observable<Result<string>> {
+    const url = `${this.BASE_URL}/${id}`;
+    return this.http.delete<Result<string>>(url, this.RequestOptions)
+      .pipe(
+        timeout(this.RequestTimeOutDefault),
+        catchError(this.handleError)
+      );
+  }
+
+  updateBookmark(model: BookmarkModel): Observable<Result<string>> {
+    return this.http.put<Result<string>>(this.BASE_URL, model, this.RequestOptions)
       .pipe(
         timeout(this.RequestTimeOutDefault),
         catchError(this.handleError)

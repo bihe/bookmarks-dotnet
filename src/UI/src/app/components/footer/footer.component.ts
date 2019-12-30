@@ -27,7 +27,10 @@ export class FooterComponent implements OnInit {
         data => {
           this.appData = data;
           this.appData.uiRuntime = 'angular=' + VERSION.full;
-
+          const adminRole = this.appData.userInfo.roles.find(x => x === 'Admin');
+          if (adminRole) {
+            this.appState.setAdmin(true);
+          }
           this.appState.setAppInfo(data);
         },
         error => {

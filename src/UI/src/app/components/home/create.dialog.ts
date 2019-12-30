@@ -19,18 +19,24 @@ export class CreateBookmarksDialog implements OnInit {
   {}
 
   ngOnInit(): void {
-    this.bookmark = new BookmarkModel();
-    this.type = ItemType.Node.toString();
+    if (this.data.existingBookmark) {
+      this.bookmark = this.data.existingBookmark;
+      this.type = this.bookmark.type.toString();
+    } else {
+      this.bookmark = new BookmarkModel();
+      this.bookmark.id = '';
+      this.type = ItemType.Node.toString();
+    }
     this.selectedPath = this.data.currentPath;
   }
 
   onSave(): void {
     let itemType = ItemType.Node;
-    if (this.type === 'folder') {
+    if (this.type === 'Folder') {
       itemType = ItemType.Folder;
     }
-    this.bookmark.Type = itemType;
-    this.bookmark.Path = this.selectedPath;
+    this.bookmark.type = itemType;
+    this.bookmark.path = this.selectedPath;
     this.dialogRef.close({
       result: true,
       model: this.bookmark
