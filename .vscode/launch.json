@@ -22,6 +22,14 @@
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:pickProcess}"
+        },
+        {
+            "name": "Attach to Chrome",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "url": "http://localhost:4200/start",
+            "webRoot": "${workspaceFolder}/src/UI/src"
         }
     ]
 }

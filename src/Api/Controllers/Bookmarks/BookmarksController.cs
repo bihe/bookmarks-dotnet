@@ -93,6 +93,11 @@ namespace Api.Controllers.Bookmarks
             });
         }
 
+        /// <summary>
+        /// get bookmarks by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("byname")]
         [ProducesResponseType(typeof(ListResult<List<BookmarkModel>>),StatusCodes.Status200OK)]
