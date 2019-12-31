@@ -1,4 +1,5 @@
 <div class="bookmarks_content">
+
     <div class="bookmarks_breadcrumb">
 
       <span *ngFor="let p of pathElemets; let i = index">
@@ -40,10 +41,17 @@
           [ URL: <a href="{{ item.url}}" target="_blank" class="bookmark_url">{{ item.url }}</a> ]
         </span>
         <span *ngIf="item.type === 'Folder'">
-          <i class="fa fa-folder" aria-hidden="true"></i>&nbsp;
+          <mat-icon matBadge="{{ item.childCount }}"
+            matBadgeColor="accent"
+            class="bookmark_folder_icon"
+            *ngIf="item.childCount > 0">folder</mat-icon>
+
+          <mat-icon
+            class="bookmark_folder_icon"
+            *ngIf="item.childCount === 0">folder</mat-icon>
+
           <span class="badge badge-dark bookmark_path_info" *ngIf="searchMode" (click)="gotoPath(item.path)">{{ item.path }}</span>&nbsp;
           <a class="bookmark_folder" (click)="gotoPath(item.path + '/' + item.displayName)">{{ item.displayName }}</a>
-          <span class="badge badge-pill badge-warning bookmark_child_items" *ngIf="item.childCount > 0">{{ item.childCount }}</span>
         </span>
 
         <div class="bookmark_actions">

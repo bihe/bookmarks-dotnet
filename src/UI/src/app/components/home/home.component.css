@@ -94,3 +94,7 @@ a.bookmark_actions {
 .bookmark_path_info:hover {
   text-decoration: underline;
 }
+
+.bookmark_folder_icon {
+  vertical-align: text-bottom;
+}

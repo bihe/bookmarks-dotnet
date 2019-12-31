@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatSnackBar } from '@angular/material';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map, switchMap } from 'rxjs/operators';
 import { BookmarkModel } from 'src/app/shared/models/bookmarks.model';
 import { ProblemDetail } from 'src/app/shared/models/error.problemdetail';
 import { ApplicationState } from 'src/app/shared/service/application.state';
@@ -26,20 +27,66 @@ export class HomeComponent implements OnInit {
 
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
-    private router: Router,
     public dialog: MatDialog,
-    private state: ApplicationState
+    private state: ApplicationState,
+    private router: Router,
+    private activeRoute: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    this.currentPath = '/';
-    this.getBookmarksForPath(this.currentPath); // initial load
+    this.activeRoute.params
+      .pipe(
+        map(p => {
+          if (p.path) {
+            // we need to have an "absolute" path
+            let path = p.path;
+            if (!path.startsWith('/')) {
+              path = "/" + path;
+            }
+            return path;
+          }
+          return '/';
+        }),
+        switchMap(path => {
+          this.state.setProgress(true);
+          this.currentPath = path;
+          this.pathElemets = this.splitPathElements(path);
+          return this.bookmarksService.getBookmarksForPath(path)
+        })
+      )
+      .subscribe(
+        data => {
+          this.state.setProgress(false);
+          if (data.count > 0) {
+            this.bookmarks = data.value;
+          } else {
+            this.bookmarks = [];
+          }
+
+          console.log('currentPath: ' + this.currentPath);
+        },
+        error => {
+          this.state.setProgress(false);
+          console.log('Error: ' + error);
+          new MessageUtils().showError(this.snackBar, error);
+        }
+      );
 
     this.state.isAdmin().subscribe(
       data => {
        this.isAdmin = data;
       }
     );
+  }
+
+  gotoPath(path: string) {
+    if (path.startsWith('//')) {
+      path = path.replace('//', '/'); // fix for the root path!
+    }
+    console.log('goto: ' + path);
+    // push the path to the URL - pushstate like
+    this.router.navigate(['/start' + path]);
+    this.searchMode = false;
   }
 
   getBookmarksForPath(path: string) {
@@ -63,15 +110,6 @@ export class HomeComponent implements OnInit {
           new MessageUtils().showError(this.snackBar, error);
         }
       );
-  }
-
-  gotoPath(path: string) {
-    if (path.startsWith('//')) {
-      path = path.replace('//', '/'); // fix for the root path!
-    }
-    console.log('goto: ' + path);
-    this.searchMode = false;
-    this.getBookmarksForPath(path);
   }
 
   editBookmark(id: string) {
