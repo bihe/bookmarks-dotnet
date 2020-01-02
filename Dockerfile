@@ -14,10 +14,10 @@ COPY ./src/Store ./src/Store
 COPY ./Directory.Build.props .
 COPY ./Directory.Build.targets .
 COPY ./global.json .
-RUN dotnet build ./src/Api/Api.csproj -c Release && dotnet publish --self-contained -r linux-musl-x64 -c Release -v m -o output ./src/Api/Api.csproj
+RUN dotnet publish --self-contained -r linux-musl-x64 -c Release -v m -o output ./src/Api/Api.csproj
 
 ## runtime build
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine
+FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine
 LABEL author="henrik@binggl.net"
 LABEL description="Manage bookmarks independent of browsers."
 LABEL version=1
