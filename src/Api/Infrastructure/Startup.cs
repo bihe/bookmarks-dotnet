@@ -11,6 +11,8 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
 using System;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace Api.Infrastructure
 {
@@ -58,7 +60,7 @@ namespace Api.Infrastructure
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BookmarkContext context)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BookmarkContext context, IOptions<JwtSettings> jwtSettings)
         {
             app.UseRouting();
             app.UseErrorHandling();
@@ -80,6 +82,26 @@ namespace Api.Infrastructure
             {
                 context.Database.EnsureCreated();
             }
+
+            // fallback route for html5 client routing
+            // https://weblog.west-wind.com/posts/2017/Aug/07/Handling-HTML5-Client-Route-Fallbacks-in-ASPNET-Core
+            app.Run(async (context) =>
+            {
+                // only do this for html-requesting clients
+                if (ContentNegotiation.IsAcceptable(context.Request, "text/html"))
+                {
+                    var authenticated = context?.User?.Identity?.IsAuthenticated ?? false;
+                    if (!authenticated)
+                    {
+                        context!.Response.Redirect(jwtSettings.Value.LoginRedirect);
+                    }
+                    else
+                    {
+                        context!.Response.ContentType = "text/html";
+                        await context.Response.SendFileAsync(Path.Combine(env.WebRootPath, "ui/index.html"));
+                    }
+                }
+            });
         }
     }
 }
