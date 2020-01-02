@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatSnackBar } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map, switchMap } from 'rxjs/operators';
+import { flatMap, map, switchMap } from 'rxjs/operators';
 import { BookmarkModel } from 'src/app/shared/models/bookmarks.model';
 import { ProblemDetail } from 'src/app/shared/models/error.problemdetail';
 import { ApplicationState } from 'src/app/shared/service/application.state';
@@ -24,6 +24,8 @@ export class HomeComponent implements OnInit {
   isAdmin: boolean = false;
   search: string = '';
   searchMode: boolean = false;
+  changePath: boolean = false;
+  pathInput: string = '';
 
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
@@ -47,28 +49,42 @@ export class HomeComponent implements OnInit {
           }
           return '/';
         }),
-        switchMap(path => {
-          this.state.setProgress(true);
-          this.currentPath = path;
-          this.pathElemets = this.splitPathElements(path);
-          return this.bookmarksService.getBookmarksForPath(path)
+        flatMap(path => {
+          return this.bookmarksService.getBookmarkFolderByPath(path);
+        }),
+        switchMap(folderResult => {
+          // if we have received a folder, we need to get the path!
+          if (folderResult.success === true) {
+            let path = folderResult.value.path;
+            if (!path.endsWith('/')) {
+              path += '/';
+            }
+            // special root treatment!
+            if (folderResult.value.displayName !== 'Root') {
+              path = path + folderResult.value.displayName;
+            }
+            this.state.setProgress(true);
+            this.currentPath = path;
+            this.pathElemets = this.splitPathElements(path);
+            return this.bookmarksService.getBookmarksForPath(path)
+          }
         })
       )
       .subscribe(
         data => {
+          console.log(data);
           this.state.setProgress(false);
           if (data.count > 0) {
             this.bookmarks = data.value;
           } else {
             this.bookmarks = [];
           }
-
           console.log('currentPath: ' + this.currentPath);
         },
         error => {
           this.state.setProgress(false);
           console.log('Error: ' + error);
-          new MessageUtils().showError(this.snackBar, error);
+          new MessageUtils().showError(this.snackBar, error.detail);
         }
       );
 
@@ -87,6 +103,9 @@ export class HomeComponent implements OnInit {
     // push the path to the URL - pushstate like
     this.router.navigate(['/start' + path]);
     this.searchMode = false;
+    if (this.changePath === true) {
+      this.pathInput = path;
+    }
   }
 
   getBookmarksForPath(path: string) {
@@ -107,7 +126,7 @@ export class HomeComponent implements OnInit {
         error => {
           this.state.setProgress(false);
           console.log('Error: ' + error);
-          new MessageUtils().showError(this.snackBar, error);
+          new MessageUtils().showError(this.snackBar, error.detail);
         }
       );
   }
@@ -263,9 +282,26 @@ export class HomeComponent implements OnInit {
         error => {
           this.state.setProgress(false);
           console.log('Error: ' + error);
-          new MessageUtils().showError(this.snackBar, error);
+          new MessageUtils().showError(this.snackBar, error.detail);
         }
       );
+  }
+
+  editMode(active: boolean) {
+    this.changePath = active;
+    if (active) {
+      this.pathInput = this.currentPath;
+    } else {
+      this.pathInput = '';
+    }
+  }
+
+  doChangePath() {
+    if (this.changePath === true && this.pathInput !== '') {
+      this.gotoPath(this.pathInput);
+    } else {
+      console.log('cannot change path - invalid!');
+    }
   }
 
   private splitPathElements(path: string) : string[] {

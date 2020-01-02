@@ -2,28 +2,46 @@
 
     <div class="bookmarks_breadcrumb">
 
-      <span *ngFor="let p of pathElemets; let i = index">
-        <span *ngIf="p === '/'">
-          / <a class="root" (click)="gotoPath('/')">Root</a>
-        </span>
-        <span *ngIf="p !== '/' && i &lt; pathElemets.length - 1">
-          / <a class="root" (click)="gotoPath(absolutePaths[i])">{{ p }}</a>
-        </span>
-        <span *ngIf="p !== '/' && i === pathElemets.length - 1 ">
-          / {{ p }}
-        </span>
-      </span>
+      <div class="boomkark_breadcramub_standard" *ngIf="changePath === false">
 
-      <div class="float-right">
-        <form class="form-inline my-lg-0" #searchForm="ngForm" name="searchForm">
-          <input class="form-control mr-sm-2" type="search" name="searchInput"
-            placeholder="Search" [(ngModel)]="search" aria-label="Search" required>
-          <button class="btn btn-outline-success my-sm-0"
-            type="button"
-            (click)="searchBookmarks()"
-            [disabled]="!searchForm.form.valid"
-            >Search</button>
-        </form>
+        <i class="fa fa-lock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(true)"></i>
+
+        <span *ngFor="let p of pathElemets; let i = index">
+          <span *ngIf="p === '/'">
+            / <a class="root" (click)="gotoPath('/')">Root</a>
+          </span>
+          <span *ngIf="p !== '/' && i &lt; pathElemets.length - 1">
+            / <a class="root" (click)="gotoPath(absolutePaths[i])">{{ p }}</a>
+          </span>
+          <span *ngIf="p !== '/' && i === pathElemets.length - 1 ">
+            / {{ p }}
+          </span>
+        </span>
+
+        <div class="float-right bookmark_search">
+          <form class="form-inline my-lg-0" #searchForm="ngForm" name="searchForm">
+            <input class="form-control mr-sm-2" type="search" name="searchInput"
+              placeholder="Search" [(ngModel)]="search" aria-label="Search" required>
+            <button class="btn btn-outline-success my-sm-0"
+              type="button"
+              (click)="searchBookmarks()"
+              [disabled]="!searchForm.form.valid"
+              >Search</button>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="boomkark_breadcramub_standard" *ngIf="changePath === true">
+
+        <i class="fa fa-unlock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(false)"></i>
+        &nbsp;
+        <span>
+          <input type="text" class="bookmark_path_edit" id="editPath" aria-describedby="editPath"
+            [(ngModel)]="pathInput"
+            (keyup.enter)="doChangePath()"
+            >
+        </span>
       </div>
 
     </div>

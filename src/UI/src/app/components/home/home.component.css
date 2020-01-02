@@ -56,6 +56,8 @@ a.bookmark_url {
 .bookmark_actions {
   float: right;
   padding-right: 10px;
+  position: relative;
+  top: -5px;
 }
 
 a.bookmark_actions {
@@ -96,5 +98,32 @@ a.bookmark_actions {
 }
 
 .bookmark_folder_icon {
-  vertical-align: text-bottom;
+  vertical-align: middle;
+}
+
+.bookmark_search {
+  position: relative;
+  top: -7px;
+}
+
+.bookmark_path_edit_action:hover {
+  cursor: pointer;
+  color: red;
+}
+
+
+.bookmark_path_edit {
+  /* display: block; */
+  width: 95%;
+  height: calc(1.5em + .75rem + 2px);
+  padding: .375rem .75rem;
+  /* font-size: 1rem; */
+  font-weight: 400;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }

@@ -3,8 +3,6 @@
 @import 'https://fonts.googleapis.com/icon?family=Material+Icons';
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono|Source+Code+Pro&display=swap');
 
-html, body { margin: 0; padding: 0; height: 100%; font-family: monospace; }
-
 .success {
   background-color: #27AE60 !important;
 }
@@ -21,5 +19,4 @@ html, body { margin: 0; padding: 0; height: 100%; font-family: monospace; }
   width: 100%;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body { margin: 0; padding: 0; height: 100%; font-family: 'Roboto Mono', monospace; font-size: 0.9em; }

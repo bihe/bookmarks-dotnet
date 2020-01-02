@@ -24,6 +24,15 @@ export class ApiBookmarksService extends BaseDataService {
       );
   }
 
+  getBookmarkFolderByPath(path: string): Observable<Result<BookmarkModel>> {
+    const url = `${this.BASE_URL}/folder?path=${path}`;
+    return this.http.get<Result<BookmarkModel>>(url, this.RequestOptions)
+      .pipe(
+        timeout(this.RequestTimeOutDefault),
+        catchError(this.handleError)
+      );
+  }
+
   getBookmarksByName(name: string): Observable<ListResult<BookmarkModel[]>> {
     const url = `${this.BASE_URL}/byname?name=${name}`;
     return this.http.get<ListResult<BookmarkModel[]>>(url, this.RequestOptions)
