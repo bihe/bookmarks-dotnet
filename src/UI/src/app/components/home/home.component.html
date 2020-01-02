@@ -8,7 +8,7 @@
 
         <span *ngFor="let p of pathElemets; let i = index">
           <span *ngIf="p === '/'">
-            / <a class="root" (click)="gotoPath('/')">Root</a>
+            / <a class="rootroot" (click)="gotoPath('/')">ROOT</a>
           </span>
           <span *ngIf="p !== '/' && i &lt; pathElemets.length - 1">
             / <a class="root" (click)="gotoPath(absolutePaths[i])">{{ p }}</a>

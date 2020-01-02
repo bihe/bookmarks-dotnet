@@ -16,6 +16,15 @@
   cursor: pointer;
 }
 
+.bookmarks_breadcrumb a.rootroot {
+  font-weight: bold;
+  color: darkred;
+}
+
+.bookmarks_breadcrumb a.rootroot:hover {
+  cursor: pointer;
+}
+
 .bookmarks_list {
   display: block;
 }
