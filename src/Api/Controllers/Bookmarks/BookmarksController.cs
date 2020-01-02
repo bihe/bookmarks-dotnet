@@ -283,6 +283,8 @@ namespace Api.Controllers.Bookmarks
                             }
                         }
                     }
+                    var existingDisplayName = existing.DisplayName;
+                    var existingPath = existing.Path;
 
                     var item = await _repository.Update(new BookmarkEntity{
                         Id = bookmark.Id,
@@ -295,6 +297,35 @@ namespace Api.Controllers.Bookmarks
                         UserName = user.Username,
                         ChildCount = childCount
                     });
+
+                    if (existing.Type == Store.ItemType.Folder && existingDisplayName != bookmark.DisplayName)
+                    {
+                        // if we have a folder and change the displayname this also affects ALL sub-elements
+                        // therefore all paths of sub-elements where this folder-path is present, need to be updated
+                        var newPath = $"{bookmark.Path}/{bookmark.DisplayName}";
+                        var oldPath = $"{existingPath}/{existingDisplayName}";
+
+                        _logger.LogDebug($"will update all old paths '{oldPath}' to new path '{newPath}'.");
+
+                        var bookmarks = await _repository.GetBookmarksByPathStart(oldPath, user.Username);
+                        if (bookmarks == null)
+                            bookmarks = new List<BookmarkEntity>();
+                        foreach(var bm in bookmarks)
+                        {
+                            var updatedPath = bm.Path.Replace(oldPath, newPath);
+                            await _repository.Update(new BookmarkEntity{
+                                Id = bm.Id,
+                                Created = existing.Created,
+                                DisplayName = bm.DisplayName,
+                                Path = updatedPath,
+                                SortOrder = bm.SortOrder,
+                                Type = bm.Type,
+                                Url = bm.Url,
+                                UserName = bm.UserName,
+                                ChildCount = bm.ChildCount
+                            });
+                        }
+                    }
 
                     _logger.LogInformation($"Updated Bookmark with ID {id}");
 
