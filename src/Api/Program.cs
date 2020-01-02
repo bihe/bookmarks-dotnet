@@ -20,6 +20,8 @@ namespace Api
         {
             Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
+            Console.Out.WriteLine($"Start application in mode {Env}.");
+
             return Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
