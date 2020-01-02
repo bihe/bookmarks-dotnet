@@ -337,3 +337,5 @@ coverage.cobertura.xml
 
 dist/
 lcov.info
+
+src/Api/wwwroot/ui/
