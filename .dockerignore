@@ -1,0 +1,6 @@
+.git
+.vscode
+test/
+src/UI/node_modules
+src/UI/dist
+scripts/
