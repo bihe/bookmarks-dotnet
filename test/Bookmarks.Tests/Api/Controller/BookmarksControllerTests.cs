@@ -544,6 +544,116 @@ namespace Bookmarks.Tests.Api.Controller
                 .Should()
                 .Be(Errors.InvalidRequestError);
         }
+
+        [Fact]
+        public async Task TestGetBookmarkFolderByPath()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarkFolderByPath("/path");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<Result<BookmarkModel>>();
+
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Value.DisplayName
+                .Should()
+                .Be("Folder");
+        }
+
+        [Fact]
+        public async Task TestGetBookmarkFolderByPath_IsRoot()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarkFolderByPath("/");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<Result<BookmarkModel>>();
+
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Value.DisplayName
+                .Should()
+                .Be("Root");
+        }
+
+        [Fact]
+        public async Task TestGetBookmarkFolderByPath_MissingPath()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarkFolderByPath("");
+
+           // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var getfolderResult = result.As<ObjectResult>();
+            var problem = (ProblemDetails)getfolderResult.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
+
+        [Fact]
+        public async Task TestGetBookmarkFolderByPath_NotFond()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.GetBookmarkFolderByPath("notfound");
+
+           // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var getfolderResult = result.As<ObjectResult>();
+            var problem = (ProblemDetails)getfolderResult.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.NotFound);
+            problem.Title
+                .Should()
+                .Be(Errors.NotFoundError);
+        }
     }
 
     internal class MockDBRepoException : MockDBRepo
@@ -626,6 +736,24 @@ namespace Bookmarks.Tests.Api.Controller
                     };
                 }
                 return null;
+            });
+        }
+
+        public override async Task<BookmarkEntity> GetFolderByPath(string path, string username)
+        {
+            return await Task.Run(() => {
+                if (path == "notfound")
+                    return null;
+                return new BookmarkEntity{
+                    ChildCount = 0,
+                    Created = DateTime.UtcNow,
+                    DisplayName = "Folder",
+                    Id = Guid.NewGuid().ToString(),
+                    Path = path,
+                    SortOrder = 0,
+                    Type = persistence.ItemType.Folder,
+                    UserName = username
+                };
             });
         }
 

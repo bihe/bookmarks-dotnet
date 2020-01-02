@@ -253,7 +253,7 @@ namespace Store
             var q = from b in _context.Bookmarks where
                 b.UserName.ToLower() == username.ToLower() &&
                 b.Path == parent &&
-                b.DisplayName == folder &&
+                b.DisplayName.ToLower() == folder.ToLower() &&
                 b.Type == ItemType.Folder
                 select b;
 

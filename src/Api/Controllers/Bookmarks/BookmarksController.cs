@@ -93,6 +93,56 @@ namespace Api.Controllers.Bookmarks
             });
         }
 
+        [HttpGet]
+        [Route("folder")]
+        [ProducesResponseType(typeof(Result<BookmarkModel>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> GetBookmarkFolderByPath([FromQuery] string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return InvalidArguments($"Invalid path supplid");
+            }
+
+            _logger.LogDebug($"Try to fetch bookmark folder for the given path '{path}'");
+
+            var user = this.User.Get();
+            if (path == "/")
+            {
+                // special treatment for the root path. This path is ALWAYS available
+                // and does not have a specific storage entry - this is by convention
+                return Ok(new Result<BookmarkModel>{
+                    Success = true,
+                    Value = new BookmarkModel {
+                        DisplayName = "Root",
+                        Path = "/",
+                        Type = ItemType.Folder,
+                        SortOrder = 0,
+                        Id = $"{user.Username}_ROOT"
+                    },
+                    Message = $"Found bookmark folder for path {path}."
+                });
+            }
+
+            var bookmark = await _repository.GetFolderByPath(path, user.Username);
+            if (bookmark == null)
+            {
+                _logger.LogWarning($"Could not find a bookmark follder by path '{path}'");
+                return ProblemDetailsResult(
+                    detail: $"No bookmark folder found by path: {path}",
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: Errors.NotFoundError,
+                    instance: HttpContext.Request.Path);
+            }
+            return Ok(new Result<BookmarkModel>{
+                Success = true,
+                Value = ToModel(bookmark),
+                Message = $"Found bookmark folder for path {path}."
+            });
+        }
+
+
         /// <summary>
         /// get bookmarks by name
         /// </summary>
