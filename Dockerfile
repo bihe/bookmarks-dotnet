@@ -27,7 +27,7 @@ RUN mkdir -p /opt/bookmarks.binggl.net/_logs
 
 ## copy assets and build results from prior steps
 COPY --from=BACKEND-BUILD /backend-build/output /opt/bookmarks.binggl.net/
-COPY --from=FRONTEND-BUILD /fronted-build/dist /opt/bookmarks.binggl.net/wwwroot/ui
+COPY --from=FRONTEND-BUILD /fronted-build/dist/bookmarks-ui /opt/bookmarks.binggl.net/wwwroot/ui
 
 EXPOSE 3000
 ENV ASPNETCORE_ENVIRONMENT Production
