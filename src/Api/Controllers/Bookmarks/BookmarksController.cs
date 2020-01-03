@@ -268,11 +268,8 @@ namespace Api.Controllers.Bookmarks
                     {
                         // on save of a folder, update the child-count!
                         var parentPath = existing.Path;
-                        if (!parentPath.EndsWith("/"))
-                        {
-                            parentPath += "/";
-                        }
-                        var path = parentPath + existing.DisplayName;
+                        var path = EnsureFolderPath(parentPath, existing.DisplayName);
+
                         var nodeCounts = await _repository.GetChildCountOfPath(path, user.Username);
                         if (nodeCounts != null && nodeCounts.Count > 0)
                         {
@@ -302,8 +299,8 @@ namespace Api.Controllers.Bookmarks
                     {
                         // if we have a folder and change the displayname this also affects ALL sub-elements
                         // therefore all paths of sub-elements where this folder-path is present, need to be updated
-                        var newPath = $"{bookmark.Path}/{bookmark.DisplayName}";
-                        var oldPath = $"{existingPath}/{existingDisplayName}";
+                        var newPath = EnsureFolderPath(bookmark.Path, bookmark.DisplayName);
+                        var oldPath = EnsureFolderPath(existingPath, existingDisplayName);
 
                         _logger.LogDebug($"will update all old paths '{oldPath}' to new path '{newPath}'.");
 
@@ -456,6 +453,25 @@ namespace Api.Controllers.Bookmarks
                 detail: message,
                 instance: HttpContext.Request.Path
             );
+        }
+
+        // EnsureFolderPath takes care that the supplied path is valid
+        // e.g. it does not start with two slashes '//' and that the resulting
+        // path is valid, with all necessary delimitors
+        string EnsureFolderPath(string path, string displayName)
+        {
+            var folderPath = path;
+            if (!path.EndsWith("/"))
+            {
+                folderPath = path + "/";
+            }
+            if (folderPath.StartsWith("//"))
+            {
+                folderPath = folderPath.Replace("//", "/");
+            }
+            folderPath += displayName;
+
+            return folderPath;
         }
     }
 }

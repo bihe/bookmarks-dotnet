@@ -300,6 +300,81 @@ namespace Bookmarks.Tests.Api.Controller
         }
 
         [Fact]
+        public async Task TestUpdateBookmarks_RenameBug()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, _repo);
+            controller.ControllerContext = _fixtures.Context;
+
+            // 1) create a folder in root
+            var rootFolder = new BookmarkModel{
+                DisplayName = "Folder",
+                Path = "/",
+                Type = global::Api.Controllers.Bookmarks.ItemType.Folder,
+            };
+            var result = await controller.Create(rootFolder);
+            var create = result.As<CreatedResult>();
+            create.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.Created);
+            var bookmarkResult = create.Value.As<Result<string>>();
+            var folderId = bookmarkResult.Value;
+
+            // 2) create a node in the folder
+            var node = new BookmarkModel{
+                DisplayName = "Node",
+                Path = "/Folder",
+                Type = global::Api.Controllers.Bookmarks.ItemType.Node,
+                Url = "url"
+            };
+            result = await controller.Create(node);
+            create = result.As<CreatedResult>();
+            create.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.Created);
+
+            // 3) rename the root-folder
+            result = await controller.Update(new BookmarkModel{
+                Id = folderId,
+                DisplayName = "Folder_renamed",
+                Path = "/",
+                Type = global::Api.Controllers.Bookmarks.ItemType.Folder,
+            });
+
+            result
+                .Should()
+                .NotBeNull();
+            var update = result.As<OkObjectResult>();
+
+            update.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+
+            bookmarkResult = update.Value.As<Result<string>>();
+            bookmarkResult.Value
+                .Should()
+                .Be(folderId);
+
+            // 4) get the list of nodes within the folder -- it should return the node from above
+            result = await controller.GetBookmarksByPath("/Folder_renamed");
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Count
+                .Should()
+                .Be(1);
+            bm.Value[0].DisplayName
+                .Should()
+                .Be("Node");
+        }
+
+
+        [Fact]
         public async Task TestDeleteBookmarks()
         {
             // Arrange
