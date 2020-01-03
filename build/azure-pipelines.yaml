@@ -18,7 +18,7 @@ steps:
   displayName: 'Build Docker image: bookmark'
   inputs:
     command: build
-    Dockerfile: './Dockerfile'
+    Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
     repository: $(imageName)
     tags: |
       latest
