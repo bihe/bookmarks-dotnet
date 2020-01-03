@@ -51,6 +51,7 @@ export class HomeComponent implements OnInit {
           return '/';
         }),
         flatMap(path => {
+          this.state.setProgress(true);
           return this.bookmarksService.getBookmarkFolderByPath(path);
         }),
         switchMap(folderResult => {
@@ -64,7 +65,6 @@ export class HomeComponent implements OnInit {
             if (folderResult.value.displayName !== 'Root') {
               path = path + folderResult.value.displayName;
             }
-            this.state.setProgress(true);
             this.currentPath = path;
             this.pathElemets = this.splitPathElements(path);
             return this.bookmarksService.getBookmarksForPath(path)
@@ -101,15 +101,22 @@ export class HomeComponent implements OnInit {
       path = path.replace('//', '/'); // fix for the root path!
     }
     console.log('goto: ' + path);
-    // push the path to the URL - pushstate like
-    this.router.navigate(['/start' + path]);
-    this.searchMode = false;
-    if (this.changePath === true) {
-      this.pathInput = path;
+    if (path === this.currentPath) {
+      // reload the data
+      this.getBookmarksForPath(path);
+    }
+    else {
+      // push the path to the URL - pushstate like
+      this.router.navigate(['/start' + path]);
+      this.searchMode = false;
+      if (this.changePath === true) {
+        this.pathInput = path;
+      }
     }
   }
 
   getBookmarksForPath(path: string) {
+    this.searchMode = false;
     this.state.setProgress(true);
     this.bookmarksService.getBookmarksForPath(path)
       .subscribe(

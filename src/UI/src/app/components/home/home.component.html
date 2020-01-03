@@ -72,7 +72,7 @@
 
         <span *ngIf="item.type === 'Node'">
           <i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;
-          <span class="badge badge-dark bookmark_path_info" *ngIf="searchMode" (click)="gotoPath(item.path)">{{ item.path }}</span>&nbsp;
+          <span class="badge badge-dark bookmark_path_info" *ngIf="searchMode" (click)="gotoPath(item.path)">{{ item.path }}&nbsp;</span>
           <a href="{{ item.url}}" target="_blank" class="bookmark_name">{{ item.displayName }}</a>
           <span class="d-none d-sm-inline">&nbsp;[ URL: <a href="{{ item.url}}" target="_blank" class="bookmark_url">{{ item.url }}</a> ]</span>
         </span>
