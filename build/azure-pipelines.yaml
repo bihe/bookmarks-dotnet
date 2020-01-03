@@ -1,8 +1,8 @@
 pool:
-  vmImage: 'Ubuntu 16.04'
+  vmImage: 'ubuntu-18.04'
 
 variables:
-  DOCKER_BUILDKIT: 1
+  #DOCKER_BUILDKIT: 1
   TSTAMP: $[format('{0:yyyyMMdd}', pipeline.startTime)]
   imageName: 'bihe/bookmarks-dotnet'
 
@@ -15,7 +15,7 @@ steps:
     containerRegistry: dockerhub
 
 - task: Docker@2
-  displayName: 'Build Docker image: bookmark'
+  displayName: 'Build Docker image: bookmarks-dotnet'
   inputs:
     command: build
     Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
