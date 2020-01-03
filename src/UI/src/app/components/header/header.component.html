@@ -24,7 +24,7 @@
         </div>
 
         <!-- ACTIONS -->
-        <div class="navactions">
+        <div class="navactions d-none d-sm-inline">
            <!-- USER -->
            <span *ngIf="appInfo" title="{{ appInfo?.userInfo?.displayName }}" class="hidden-xs">
               <i class="fa fa-sign-out" aria-hidden="true"></i>&nbsp;<a class="link" href="https://bookmarks.binggl.net" matTooltip="{{ appInfo?.userInfo?.userName }} ({{ appInfo?.userInfo?.email }})">{{ appInfo?.userInfo?.displayName }}</a>

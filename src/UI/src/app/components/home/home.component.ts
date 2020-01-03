@@ -140,7 +140,7 @@ export class HomeComponent implements OnInit {
         console.log(data);
 
         const dialogRef = this.dialog.open(CreateBookmarksDialog, {
-          width: '50vw',
+          panelClass: 'my-full-screen-dialog',
           data: {
             absolutePaths: this.absolutePaths,
             currentPath: this.currentPath,

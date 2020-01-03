@@ -40,6 +40,7 @@ export class HeaderComponent implements OnInit {
       .subscribe(
         data => {
           this.appInfo = data;
+          this.appInfo.versionInfo.version = '1.0.213-98454be26afb86f29adb4cee6a5302767cc9a2e5';
         },
         error => {
           new MessageUtils().showError(this.snackBar, error);

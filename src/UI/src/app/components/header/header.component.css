@@ -62,6 +62,19 @@ div.navinfo {
   font-family: 'Source Code Pro', monospace;
 }
 
+@media (max-width: 575.98px) {
+
+  div.navinfo {
+    flex: 1 1 1px;
+    box-sizing: border-box;
+    padding-left: 3px;
+    font-weight: bold;
+    font-size: 1.2em;
+    font-family: 'Source Code Pro', monospace;
+  }
+
+}
+
 .app-title {
   font-size: 1.5em;
   font-weight: bold;
