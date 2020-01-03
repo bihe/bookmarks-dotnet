@@ -21,6 +21,7 @@ FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine
 LABEL author="henrik@binggl.net"
 LABEL description="Manage bookmarks independent of browsers."
 LABEL version=1
+
 WORKDIR /opt/bookmarks.binggl.net
 RUN mkdir -p /opt/bookmarks.binggl.net/_logs
 
@@ -31,4 +32,13 @@ COPY --from=FRONTEND-BUILD /fronted-build/dist /opt/bookmarks.binggl.net/wwwroot
 EXPOSE 3000
 ENV ASPNETCORE_ENVIRONMENT Production
 ENV ASPNETCORE_URLS http://*:3000
+
+# Do not run as root user
+## alpine specific user/group creation
+RUN addgroup -g 1000 -S bookmarks && \
+    adduser -u 1000 -S bookmarks -G bookmarks
+
+RUN chown -R bookmarks:bookmarks /opt/bookmarks.binggl.net
+USER bookmarks
+
 CMD ["/opt/bookmarks.binggl.net/Api"]
