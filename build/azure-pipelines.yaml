@@ -2,7 +2,7 @@ pool:
   vmImage: 'ubuntu-18.04'
 
 variables:
-  #DOCKER_BUILDKIT: 1
+  DOCKER_BUILDKIT: 1
   TSTAMP: $[format('{0:yyyyMMdd}', pipeline.startTime)]
   imageName: 'bihe/bookmarks-dotnet'
 
