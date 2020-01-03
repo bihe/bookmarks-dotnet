@@ -21,6 +21,7 @@ export class HomeComponent implements OnInit {
   currentPath: string = '';
   pathElemets: string[] = [];
   absolutePaths: string[] = [];
+  isUser: boolean = true;
   isAdmin: boolean = false;
   search: string = '';
   searchMode: boolean = false;
@@ -196,7 +197,7 @@ export class HomeComponent implements OnInit {
   addBookmark() {
     console.log('add bookmark!');
     const dialogRef = this.dialog.open(CreateBookmarksDialog, {
-      width: '50vw',
+      panelClass: 'my-full-screen-dialog',
       data: {
         absolutePaths: this.absolutePaths,
         currentPath: this.currentPath

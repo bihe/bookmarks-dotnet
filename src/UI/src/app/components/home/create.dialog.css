@@ -1,5 +1,6 @@
 .edit_bookmark_layout {
   padding: 10px;
+  width: 100%;
 }
 
 .edit_bookmark_container {
@@ -20,4 +21,17 @@
   display: flex;
   justify-content: space-between;
   padding-bottom: 30px;
+}
+
+.dialog-form-input {
+  font-size: 1.0em;
+  padding: 2px;
+}
+
+@media (max-width: 575.98px) {
+
+  .dialog-form-input {
+    font-size: 1.5em;
+    padding: 5px;
+  }
 }

@@ -4,7 +4,8 @@
 
       <div class="boomkark_breadcramub_standard" *ngIf="changePath === false">
 
-        <i class="fa fa-lock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(true)"></i>
+        <i class="d-none d-sm-inline fa fa-lock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(true)"></i>
+        <i class="d-inline d-sm-none fa fa-lock fa-2x bookmark_path_edit_action" aria-hidden="true" (click)="editMode(true)"></i>
 
         <span *ngFor="let p of pathElemets; let i = index">
           <span *ngIf="p === '/'">
@@ -18,15 +19,15 @@
           </span>
         </span>
 
-        <div class="float-right bookmark_search">
+        <div class="float-right bookmark_search d-none d-sm-block">
           <form class="form-inline my-lg-0" #searchForm="ngForm" name="searchForm">
             <input class="form-control mr-sm-2" type="search" name="searchInput"
               placeholder="Search" [(ngModel)]="search" aria-label="Search" required>
-            <button class="btn btn-outline-success my-sm-0"
+            <button class="btn btn-success my-sm-0"
               type="button"
               (click)="searchBookmarks()"
               [disabled]="!searchForm.form.valid"
-              >Search</button>
+              >Go</button>
           </form>
         </div>
 
@@ -34,7 +35,8 @@
 
       <div class="boomkark_breadcramub_standard" *ngIf="changePath === true">
 
-        <i class="fa fa-unlock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(false)"></i>
+        <i class="d-none d-sm-inline fa fa-unlock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(false)"></i>
+        <i class="d-inline d-sm-none fa fa-unlock fa-2x bookmark_path_edit_action" aria-hidden="true" (click)="editMode(false)"></i>
         &nbsp;
         <span>
           <input type="text" class="bookmark_path_edit" id="editPath" aria-describedby="editPath"
@@ -46,18 +48,35 @@
 
     </div>
 
+    <div class="bookmark_search_responsive d-block d-sm-none">
+
+      <div class="input-group mb-3">
+          <input class="form-control form-control-lg" type="search" name="searchInput"
+            placeholder="Search" [(ngModel)]="search" aria-label="Search" required>
+          <div class="input-group-append">
+            <button class="btn btn-success my-sm-0"
+            type="button"
+            (click)="searchBookmarks()"
+            >Go</button>
+          </div>
+      </div>
+
+    </div>
+
     <div class="bookmarks_list">
       <div class="bookmark_item" *ngIf="bookmarks.length === 0">
         <i>no entries available</i>
       </div>
       <div class="bookmark_item" *ngFor="let item of bookmarks; let i = index" id="{{ item.id }}">
         <span class="bookmark_index">{{ i+1 }}</span>&nbsp;
+
         <span *ngIf="item.type === 'Node'">
           <i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;
           <span class="badge badge-dark bookmark_path_info" *ngIf="searchMode" (click)="gotoPath(item.path)">{{ item.path }}</span>&nbsp;
           <a href="{{ item.url}}" target="_blank" class="bookmark_name">{{ item.displayName }}</a>
-          [ URL: <a href="{{ item.url}}" target="_blank" class="bookmark_url">{{ item.url }}</a> ]
+          <span class="d-none d-sm-inline">&nbsp;[ URL: <a href="{{ item.url}}" target="_blank" class="bookmark_url">{{ item.url }}</a> ]</span>
         </span>
+
         <span *ngIf="item.type === 'Folder'">
           <mat-icon matBadge="{{ item.childCount }}"
             matBadgeColor="accent"
@@ -92,7 +111,7 @@
     </div>
 </div>
 
-<div class="add" *ngIf="isAdmin" >
+<div class="add" *ngIf="isAdmin || isUser" >
   <button mat-fab
       color="accent"
       (click)="addBookmark()">

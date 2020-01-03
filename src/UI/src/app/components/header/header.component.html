@@ -27,7 +27,7 @@
         <div class="navactions">
            <!-- USER -->
            <span *ngIf="appInfo" title="{{ appInfo?.userInfo?.displayName }}" class="hidden-xs">
-              <i class="fa fa-sign-out" aria-hidden="true"></i>&nbsp;<a class="link" href="https://bookmars.binggl.net" matTooltip="{{ appInfo?.userInfo?.userName }} ({{ appInfo?.userInfo?.email }})">{{ appInfo?.userInfo?.displayName }}</a>
+              <i class="fa fa-sign-out" aria-hidden="true"></i>&nbsp;<a class="link" href="https://bookmarks.binggl.net" matTooltip="{{ appInfo?.userInfo?.userName }} ({{ appInfo?.userInfo?.email }})">{{ appInfo?.userInfo?.displayName }}</a>
              </span>
         </div>
     </div>
@@ -44,6 +44,15 @@
   <ul class="menu__list">
     <li><i class="fa fa-home" aria-hidden="true"></i> <a href="#">Home</a></li>
   </ul>
+
+  <div class="menu_bottom">
+    <i class="fa fa-copyright" aria-hidden="true"></i> {{ year }} Henrik.Binggl
+    <br/><strong>bookmarks application</strong>
+    <br/><span class="fa fa-code-fork"></span>&nbsp;<span style="color:indigo">{{ appInfo?.versionInfo?.version }}</span>-<span style="color:darkred">{{ appInfo?.versionInfo?.buildNumber }}</span>
+    <br/>ui: <span style="color:darkviolet">{{ appInfo?.uiRuntime }}</span>
+    <br/><span class="fa fa-code"></span>&nbsp;<a href="/swagger/index.html">API documentation</a>
+
+  </div>
 </div>
 
 <div class="menu__overlay"

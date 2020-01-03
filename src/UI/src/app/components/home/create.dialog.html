@@ -4,17 +4,17 @@
   <form class="bookmark-form" #bookmarkForm="ngForm" name="bookmarkForm">
     <div class="edit_bookmark_container">
       <div>
-        <mat-radio-group [(ngModel)]="type" name="type" [disabled]="bookmark.id !== ''">
+        <mat-radio-group [(ngModel)]="type" name="type" [disabled]="bookmark.id !== ''" class="dialog-form-input">
           <mat-radio-button value="Node" class="radio">Bookmark</mat-radio-button>
           <mat-radio-button value="Folder">Folder</mat-radio-button>
         </mat-radio-group>
       </div>
 
       <mat-form-field>
-        <input matInput placeholder="Name" name="displayName" [(ngModel)]="bookmark.displayName" required>
+        <input class="dialog-form-input" matInput placeholder="Name" name="displayName" [(ngModel)]="bookmark.displayName" required>
       </mat-form-field>
       <mat-form-field *ngIf="type !== 'Folder'">
-        <input matInput placeholder="URL" name="url" [(ngModel)]="bookmark.url" [required]="type !== 'folder'">
+        <input class="dialog-form-input" matInput placeholder="URL" name="url" [(ngModel)]="bookmark.url" [required]="type !== 'folder'">
       </mat-form-field>
       <mat-form-field>
         <mat-label>Path</mat-label>

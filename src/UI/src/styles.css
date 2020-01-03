@@ -20,3 +20,20 @@
 }
 
 html, body { margin: 0; padding: 0; height: 100%; font-family: 'Roboto Mono', monospace; font-size: 0.9em; }
+
+
+
+
+.my-full-screen-dialog {
+  width: 50vw !important;
+}
+
+@media (max-width: 575.98px) {
+  .my-full-screen-dialog {
+    height: 100vh;
+    width: 100vw !important;
+    max-width: none !important;
+  }
+}
+
+

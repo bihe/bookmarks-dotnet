@@ -16,6 +16,7 @@ export class HeaderComponent implements OnInit {
   menuVisible = false;
   showProgress = false;
   appInfo: AppInfo;
+  year: number = new Date().getFullYear();
 
   constructor(
     private state: ApplicationState,
