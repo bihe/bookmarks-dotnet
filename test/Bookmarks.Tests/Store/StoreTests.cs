@@ -83,7 +83,7 @@ namespace Bookmarks.Tests.Store
                 SortOrder = 0,
                 Type = ItemType.Node,
                 Url = "http://url",
-                UserName = Username
+                UserName = Username,
             });
 
             Assert.NotNull(item);
@@ -104,7 +104,8 @@ namespace Bookmarks.Tests.Store
                 Path = bm.Path,
                 SortOrder = 10,
                 Url = "http://new-url",
-                UserName = bm.UserName
+                UserName = bm.UserName,
+                AccessCount = 99
             });
 
             bm = await repo.GetBookmarkById(itemId, Username);
@@ -114,6 +115,7 @@ namespace Bookmarks.Tests.Store
             Assert.Equal(Username, bm.UserName);
             Assert.Equal(10, bm.SortOrder);
             Assert.Equal("http://new-url", bm.Url);
+            Assert.Equal(99, bm.AccessCount);
 
 
             // failed update - empty path

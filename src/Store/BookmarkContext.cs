@@ -29,6 +29,7 @@ namespace Store
                 e.Property(p => p.Created).HasColumnName("created").IsRequired();
                 e.Property(p => p.Modified).HasColumnName("modified");
                 e.Property(p => p.ChildCount).HasColumnName("child_count").IsRequired().HasDefaultValue(0);
+                e.Property(p => p.AccessCount).HasColumnName("access_count").IsRequired().HasDefaultValue(0);
 
                 e.HasIndex(i => new { i.Path }).HasName("IX_PATH");
                 e.HasIndex(i => new { i.SortOrder }).HasName("IX_SORT_ORDER");

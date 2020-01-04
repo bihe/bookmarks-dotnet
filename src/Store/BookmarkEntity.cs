@@ -20,6 +20,7 @@ namespace Store
         public DateTime Created { get; set; } = DateTime.Now;
         public DateTime? Modified { get; set; }
         public int ChildCount { get; set; } = 0;
+        public int AccessCount { get; set; } = 0;
 
         public override string ToString()
         {

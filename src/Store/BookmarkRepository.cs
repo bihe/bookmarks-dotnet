@@ -144,6 +144,7 @@ namespace Store
             bm.SortOrder = item.SortOrder;
             bm.Url = item.Url;
             bm.ChildCount = item.ChildCount;
+            bm.AccessCount = item.AccessCount;
 
             // the properties Created, Type, UserName are not touched!
 
