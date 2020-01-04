@@ -339,7 +339,7 @@ namespace Api.Controllers.Bookmarks
             }
             catch(Exception EX)
             {
-                _logger.LogError($"Could not update a new bookmark entry: {EX.Message}\nstack: {EX.StackTrace}");
+                _logger.LogError($"Could not update bookmark entry: {EX.Message}\nstack: {EX.StackTrace}");
                 return ProblemDetailsResult(
                     detail: $"Could not update bookmark because of error: {EX.Message}",
                     statusCode: StatusCodes.Status500InternalServerError,
@@ -424,6 +424,75 @@ namespace Api.Controllers.Bookmarks
             }
         }
 
+        /// <summary>
+        /// use the bookmark id to redirect to the given URL
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("fetch/{id}")]
+        [ProducesResponseType(StatusCodes.Status307TemporaryRedirect)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> FetchAndForward(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return InvalidArguments( $"Invalid id supplid");
+            }
+
+            _logger.LogDebug($"Try to fetch bookmark by id '{id}'");
+
+            try
+            {
+                var outcome = await _repository.InUnitOfWorkAsync<ActionResult>(async () => {
+
+                    var user = this.User.Get();
+                    var bookmark = await _repository.GetBookmarkById(id, user.Username);
+                    if (bookmark == null || string.IsNullOrEmpty(bookmark.Id))
+                    {
+                        _logger.LogWarning($"could not get bookmark by id '{id}'");
+                        return (false, ProblemDetailsResult(
+                            statusCode: StatusCodes.Status404NotFound,
+                            title: Errors.NotFoundError,
+                            detail: $"No bookmark with given id '{id}' found.",
+                            instance: HttpContext.Request.Path
+                        ));
+                    }
+
+                    if (bookmark.Type == Store.ItemType.Folder)
+                    {
+                        _logger.LogWarning($"AccessCount and Redirect only valid for Nodes '{id}'");
+                        return (false, ProblemDetailsResult(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            title: Errors.InvalidRequestError,
+                            detail: $"Cannot use folder for redirect '{id}'",
+                            instance: HttpContext.Request.Path
+                        ));
+                    }
+
+                    bookmark.AccessCount += 1;
+                    var updated = await _repository.Update(bookmark);
+
+                    _logger.LogInformation($"Updated Bookmark.AccessCount for ID {id}");
+
+                    var result = Redirect(bookmark.Url);
+
+                    return (true, result);
+                });
+
+                return outcome.value;
+            }
+            catch(Exception EX)
+            {
+                _logger.LogError($"Could not forward bookmark url: {EX.Message}\nstack: {EX.StackTrace}");
+                return ProblemDetailsResult(
+                    detail: $"Could not foreward bookmark url because of error: {EX.Message}",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: Errors.UpdateBookmarksError,
+                    instance: HttpContext.Request.Path);
+            }
+        }
 
         List<BookmarkModel> ToModelList(List<BookmarkEntity> entities)
         {

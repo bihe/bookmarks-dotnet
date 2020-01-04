@@ -686,7 +686,7 @@ namespace Bookmarks.Tests.Api.Controller
             // Act
             var result = await controller.GetBookmarkFolderByPath("");
 
-           // Assert
+            // Assert
             result
                 .Should()
                 .NotBeNull();
@@ -728,6 +728,80 @@ namespace Bookmarks.Tests.Api.Controller
             problem.Title
                 .Should()
                 .Be(Errors.NotFoundError);
+        }
+
+        [Fact]
+        public async Task TestFetchAndForward()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.FetchAndForward("id");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var redirect = result.As<RedirectResult>();
+            redirect.Url
+                .Should()
+                .Be("http://a.b.c.de");
+        }
+
+        [Fact]
+        public async Task TestFetchAndForward_InvalidArgument()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.FetchAndForward("");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var getfolderResult = result.As<ObjectResult>();
+            var problem = (ProblemDetails)getfolderResult.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
+
+        [Fact]
+        public async Task TestFetchAndForward_Exception()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.FetchAndForward("exception");
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.InternalServerError);
+            problem.Title
+                .Should()
+                .Be(Errors.UpdateBookmarksError);
         }
     }
 
