@@ -18,20 +18,20 @@ namespace Bookmarks.Tests.Api.Controller
 {
     public class BookmarksControllerTests : TestDbProvider, IClassFixture<ControllerFixtures>
     {
-        persistence.BookmarkContext ctxt = null;
+        persistence.BookmarkContext _context = null;
         persistence.IBookmarkRepository _repo = null;
         readonly ControllerFixtures _fixtures;
         const string BookmarksBaseUrl = "/api/v1/bookmarks";
 
         public BookmarksControllerTests(ControllerFixtures fixtures)
         {
-            ctxt = SetupDbContext(nameof(BookmarksControllerTests));
-            ctxt.Database.EnsureCreated();
-            ctxt.Bookmarks.RemoveRange(ctxt.Bookmarks);
-            ctxt.SaveChanges();
+            _context = SetupDbContext(nameof(BookmarksControllerTests));
+            _context.Database.EnsureCreated();
+            _context.Bookmarks.RemoveRange(_context.Bookmarks);
+            _context.SaveChanges();
 
             var logger = Mock.Of<ILogger<persistence.DbBookmarkRepository>>();
-            _repo = new persistence.DbBookmarkRepository(ctxt, logger);
+            _repo = new persistence.DbBookmarkRepository(_context, logger);
 
             _fixtures = fixtures;
         }
