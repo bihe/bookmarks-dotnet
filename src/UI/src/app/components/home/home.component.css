@@ -66,19 +66,12 @@ a.bookmark_url {
   float: right;
   padding-right: 10px;
   position: relative;
-  top: -5px;
+  top: -7px;
 }
 
 a.bookmark_actions {
   font-weight: bold;
   font-size: 1.2em;
-}
-
-.add {
-  cursor: pointer;
-  position: fixed;
-  bottom: 50px;
-  right: 30px;
 }
 
 .bookmark_child_items {
@@ -119,6 +112,18 @@ a.bookmark_actions {
   font-style: italic;
 }
 
+.bookmark_path_edit_action {
+  vertical-align: baseline;
+}
+
+@media (max-width: 575.98px) {
+
+  .bookmark_path_edit_action {
+    vertical-align: sub;
+  }
+
+}
+
 .bookmark_path_edit_action:hover {
   cursor: pointer;
   color: red;
@@ -141,6 +146,13 @@ a.bookmark_actions {
   transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
+.add {
+  cursor: pointer;
+  position: fixed;
+  bottom: 50px;
+  right: 30px;
+}
+
 @media (max-width: 575.98px) {
 
   .bookmark_path_edit {
@@ -157,6 +169,13 @@ a.bookmark_actions {
     border: 1px solid #ced4da;
     border-radius: .25rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  }
+
+  .add {
+    cursor: pointer;
+    position: fixed;
+    top: 47px;
+    right: 10px;
   }
 
 }

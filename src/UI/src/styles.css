@@ -21,7 +21,12 @@
 
 html, body { margin: 0; padding: 0; height: 100%; font-family: 'Roboto Mono', monospace; font-size: 0.9em; }
 
-
+/*
+ overwrite some boostrap defaults
+*/
+button:focus {
+  outline: none;
+}
 
 
 .my-full-screen-dialog {

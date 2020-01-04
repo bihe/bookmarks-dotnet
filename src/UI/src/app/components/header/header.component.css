@@ -210,3 +210,7 @@ cursor: pointer;
   bottom: 300px;
   padding-left: 20px;
 }
+
+.bookmark-logo {
+  color: red;
+}
