@@ -36,7 +36,6 @@
   padding-bottom: 10px;
   border-top: solid 1px #999999;
   background-color: #ffffff;
-  cursor: move;
 }
 
 .bookmark_item:last-child {
@@ -65,7 +64,7 @@ a.bookmark_url {
 
 .bookmark_actions {
   float: right;
-  padding-right: 10px;
+  padding-right: 0px;
   position: relative;
   top: -7px;
 }
@@ -177,6 +176,14 @@ a.bookmark_actions {
     position: fixed;
     top: 47px;
     right: 10px;
+    height: 40px;
   }
 
+}
+
+.bookmark_drag_handle {
+  float: right;
+  position: relative;
+  top: 2px;
+  cursor: move;
 }

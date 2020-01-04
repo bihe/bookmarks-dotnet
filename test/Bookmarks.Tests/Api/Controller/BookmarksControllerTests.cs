@@ -18,20 +18,20 @@ namespace Bookmarks.Tests.Api.Controller
 {
     public class BookmarksControllerTests : TestDbProvider, IClassFixture<ControllerFixtures>
     {
-        persistence.BookmarkContext _context = null;
+        persistence.BookmarkContext ctxt = null;
         persistence.IBookmarkRepository _repo = null;
         readonly ControllerFixtures _fixtures;
         const string BookmarksBaseUrl = "/api/v1/bookmarks";
 
         public BookmarksControllerTests(ControllerFixtures fixtures)
         {
-            _context = SetupDbContext(nameof(BookmarksControllerTests));
-            _context.Database.EnsureCreated();
-            _context.Bookmarks.RemoveRange(_context.Bookmarks);
-            _context.SaveChanges();
+            ctxt = SetupDbContext(nameof(BookmarksControllerTests));
+            ctxt.Database.EnsureCreated();
+            ctxt.Bookmarks.RemoveRange(ctxt.Bookmarks);
+            ctxt.SaveChanges();
 
             var logger = Mock.Of<ILogger<persistence.DbBookmarkRepository>>();
-            _repo = new persistence.DbBookmarkRepository(_context, logger);
+            _repo = new persistence.DbBookmarkRepository(ctxt, logger);
 
             _fixtures = fixtures;
         }
@@ -372,7 +372,6 @@ namespace Bookmarks.Tests.Api.Controller
                 .Should()
                 .Be("Node");
         }
-
 
         [Fact]
         public async Task TestDeleteBookmarks()
@@ -803,6 +802,204 @@ namespace Bookmarks.Tests.Api.Controller
                 .Should()
                 .Be(Errors.UpdateBookmarksError);
         }
+
+        [Fact]
+        public async Task TestUpdateSortOrder()
+        {
+            IBookmarkRepository _CreateRepo()
+            {
+                var ctxt = SetupDbContext(nameof(BookmarksControllerTests));
+                ctxt.Database.EnsureCreated();
+                ctxt.Bookmarks.RemoveRange(ctxt.Bookmarks);
+                ctxt.SaveChanges();
+
+                var logger = Mock.Of<ILogger<persistence.DbBookmarkRepository>>();
+                return new persistence.DbBookmarkRepository(ctxt, logger);
+            }
+
+            // Arrange
+            var controller = new BookmarksController(Logger, _CreateRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // 1) create 3 items
+            for(int i=0; i<3; i++)
+            {
+                var item = new BookmarkModel{
+                    Id = $"id{i}",
+                    DisplayName = $"item{i}",
+                    Path = "/",
+                    Type = global::Api.Controllers.Bookmarks.ItemType.Folder,
+                };
+                var r = await controller.Create(item);
+                var c = r.As<CreatedResult>();
+                c.StatusCode
+                    .Should()
+                    .Be((int)HttpStatusCode.Created);
+            }
+
+            // 2) get the items for path '/'
+            var result = await controller.GetBookmarksByPath("/");
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Count
+                .Should()
+                .Be(3);
+            bm.Value[0].DisplayName
+                .Should()
+                .Be("item0");
+            bm.Value[2].DisplayName
+                .Should()
+                .Be("item2");
+
+            // 3) change the sort-order
+            var sorting = new BookmarksSortOrderModel {
+                Ids = new List<string> {
+                    "id2",
+                    "id0",
+                    "id1"
+                },
+                SortOrder = new List<int> {
+                    1,
+                    2,
+                    3
+                }
+            };
+
+            result = await controller.UpdateSortOrder(sorting);
+            ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var updateResult = ok.Value.As<Result<string>>();
+            updateResult.Success
+                .Should()
+                .Be(true);
+
+            // 4) get the bookmark list again
+            result = await controller.GetBookmarksByPath("/");
+            ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Count
+                .Should()
+                .Be(3);
+            bm.Value[0].DisplayName
+                .Should()
+                .Be("item2");
+            bm.Value[2].DisplayName
+                .Should()
+                .Be("item1");
+        }
+
+        [Fact]
+        public async Task TestUpdateSortOrder_MissingParameters()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.UpdateSortOrder(new BookmarksSortOrderModel {
+                Ids = new List<string>(),
+                SortOrder = new List<int>()
+            });
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var updateSortOrderResult = result.As<ObjectResult>();
+            var problem = (ProblemDetails)updateSortOrderResult.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
+
+        [Fact]
+        public async Task TestUpdateSortOrder_UnbalancedParameters()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.UpdateSortOrder(new BookmarksSortOrderModel {
+                Ids = new List<string>{
+                    "id1", "id2"
+                },
+                SortOrder = new List<int>{
+                    1
+                }
+            });
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var updateSortOrderResult = result.As<ObjectResult>();
+            var problem = (ProblemDetails)updateSortOrderResult.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.BadRequest);
+            problem.Title
+                .Should()
+                .Be(Errors.InvalidRequestError);
+        }
+
+        [Fact]
+        public async Task TestUpdateSortOrder_Exception()
+        {
+            // Arrange
+            var controller = new BookmarksController(Logger, new MockDbRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // Act
+            var result = await controller.UpdateSortOrder(new BookmarksSortOrderModel {
+                Ids = new List<string>{
+                    "exception"
+                },
+                SortOrder = new List<int>{
+                    1
+                }
+            });
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var created = result.As<ObjectResult>();
+            var problem = (ProblemDetails)created.Value;
+            problem
+                .Should()
+                .NotBeNull();
+            problem.Status
+                .Should()
+                .Be((int)HttpStatusCode.InternalServerError);
+            problem.Title
+                .Should()
+                .Be(Errors.UpdateBookmarksError);
+        }
+
     }
 
     internal class MockDBRepoException : MockDBRepo

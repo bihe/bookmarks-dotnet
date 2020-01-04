@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
-import { BookmarkModel } from '../models/bookmarks.model';
+import { BookmarkModel, BoomarkSortOrderModel } from '../models/bookmarks.model';
 import { ListResult, Result } from '../models/result.model';
 import { BaseDataService } from './api.base.service';
 
@@ -70,6 +70,15 @@ export class ApiBookmarksService extends BaseDataService {
 
   updateBookmark(model: BookmarkModel): Observable<Result<string>> {
     return this.http.put<Result<string>>(this.BASE_URL, model, this.RequestOptions)
+      .pipe(
+        timeout(this.RequestTimeOutDefault),
+        catchError(this.handleError)
+      );
+  }
+
+  updateBookmarksSortOrder(model: BoomarkSortOrderModel): Observable<Result<string>> {
+    const url = `${this.BASE_URL}/sortorder`;
+    return this.http.put<Result<string>>(url, model, this.RequestOptions)
       .pipe(
         timeout(this.RequestTimeOutDefault),
         catchError(this.handleError)

@@ -14,3 +14,8 @@ export class BookmarkModel {
   public modified: Date;
   public childCount: number;
 }
+
+export class BoomarkSortOrderModel {
+  public ids: string[]
+  public sortOrder: number[];
+}

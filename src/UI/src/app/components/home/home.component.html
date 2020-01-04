@@ -63,19 +63,22 @@
 
     </div>
 
-    <div class="bookmark_item" *ngIf="bookmarks.length === 0">
-      <i>no entries available</i>
-    </div>
+
 
     <div class="bookmarks_list" cdkDropList (cdkDropListDropped)="drop($event)" >
 
       <div cdkDrag class="bookmark_item" *ngFor="let item of bookmarks; let i = index" id="{{ item.id }}">
+
+        <div class="bookmark_item" *ngIf="bookmarks.length === 0">
+          <i>no entries available</i>
+        </div>
+
         <span class="bookmark_index">{{ i+1 }}</span>&nbsp;
 
         <span *ngIf="item.type === 'Node'">
           <i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;
           <span class="badge badge-dark bookmark_path_info" *ngIf="searchMode" (click)="gotoPath(item.path)">{{ item.path }}&nbsp;</span>
-          <a href="/api/v1/bookmarks/fetch/{{ item.id}}" target="_blank" class="bookmark_name">{{ item.displayName }}</a>
+          <a href="/api/v1/bookmarks/fetch/{{ item.id}}" target="_blank" class="bookmark_name">{{ item.displayName | ellipsis:18 }}</a>
           <span class="d-none d-sm-inline">&nbsp;[ URL: <a href="{{ item.url}}" target="_blank" class="bookmark_url">{{ item.url }}</a> ]</span>
         </span>
 
@@ -94,6 +97,8 @@
           <a class="bookmark_folder" (click)="gotoPath(item.path + '/' + item.displayName)">{{ item.displayName }}</a>
         </span>
 
+
+
         <div class="bookmark_actions">
           <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="edit bookmark items">
             <mat-icon>more_vert</mat-icon>
@@ -110,6 +115,14 @@
             </button>
           </mat-menu>
         </div>
+
+        <div class="bookmark_drag_handle" cdkDragHandle>
+          <svg width="24px" fill="#999999" viewBox="0 0 24 24">
+            <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+            <path d="M0 0h24v24H0z" fill="none"></path>
+          </svg>
+        </div>
+
       </div>
     </div>
 </div>

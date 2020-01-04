@@ -199,6 +199,7 @@ namespace Api.Controllers.Bookmarks
                 var outcome = await _repository.InUnitOfWorkAsync(async () => {
                     // even if an id is supplied it is deliberately ignored
                     var entity = await _repository.Create(new BookmarkEntity{
+                        Id = bookmark.Id,
                         DisplayName = bookmark.DisplayName,
                         Path = bookmark.Path,
                         SortOrder = bookmark.SortOrder,
@@ -238,7 +239,6 @@ namespace Api.Controllers.Bookmarks
         public async Task<ActionResult> Update([FromBody] BookmarkModel bookmark)
         {
             _logger.LogDebug($"Will try to update existing bookmark entry: {bookmark}");
-            string id = "";
 
             if (string.IsNullOrEmpty(bookmark.Path)
                 || string.IsNullOrEmpty(bookmark.DisplayName)
@@ -324,7 +324,7 @@ namespace Api.Controllers.Bookmarks
                         }
                     }
 
-                    _logger.LogInformation($"Updated Bookmark with ID {id}");
+                    _logger.LogInformation($"Updated Bookmark with ID {item.Id}");
 
                     var result = new OkObjectResult(new Result<string> {
                         Success = true,
@@ -342,6 +342,78 @@ namespace Api.Controllers.Bookmarks
                 _logger.LogError($"Could not update bookmark entry: {EX.Message}\nstack: {EX.StackTrace}");
                 return ProblemDetailsResult(
                     detail: $"Could not update bookmark because of error: {EX.Message}",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: Errors.UpdateBookmarksError,
+                    instance: HttpContext.Request.Path);
+            }
+        }
+
+        /// <summary>
+        /// update the sort-order for given ids
+        /// </summary>
+        /// <param name="sorting"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("sortorder")]
+        [ProducesResponseType(typeof(Result<string>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateSortOrder([FromBody] BookmarksSortOrderModel sorting)
+        {
+            _logger.LogDebug($"Will try to update existing bookmark entry: {sorting}");
+
+            if (sorting.Ids.Count() == 0 || sorting.SortOrder.Count() == 0)
+            {
+                return InvalidArguments($"Invalid request data supplied. Missing Ids and SortOrders!");
+            }
+            if (sorting.Ids.Count() != sorting.SortOrder.Count())
+            {
+                return InvalidArguments($"Invalid request data supplied. Ids and SortOrders need to match in count!");
+            }
+
+            try
+            {
+                var user = this.User.Get();
+                var outcome = await _repository.InUnitOfWorkAsync<ActionResult>(async () => {
+                    int updateCount = 0;
+                    for(int i=0; i<sorting.Ids.Count; i++)
+                    {
+                        var id = sorting.Ids[i];
+                        var item = await _repository.GetBookmarkById(id, user.Username);
+                        if (item != null)
+                        {
+                            _logger.LogInformation($"Will update sortOrder of item '{item.DisplayName}' with value of '{sorting.SortOrder[i]}'");
+                            item.SortOrder = sorting.SortOrder[i];
+                            await _repository.Update(item);
+                            updateCount++;
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Could not find item for id: '{id}'");
+                            return (false, ProblemDetailsResult(
+                                detail: $"Could not find bookmar by id: {id}",
+                                statusCode: StatusCodes.Status500InternalServerError,
+                                title: Errors.UpdateBookmarksError,
+                                instance: HttpContext.Request.Path
+                            ));
+                        }
+                    }
+
+                    var result = new OkObjectResult(new Result<string> {
+                        Success = true,
+                        Message = $"Updated '{updateCount}' bookmark items.",
+                        Value = updateCount.ToString()
+                    });
+
+                    return (true, result);
+                });
+                return outcome.value;
+            }
+            catch(Exception EX)
+            {
+                _logger.LogError($"Could not update bookmarks sort-order: {EX.Message}\nstack: {EX.StackTrace}");
+                return ProblemDetailsResult(
+                    detail: $"Could not update bookmark sort-order because of error: {EX.Message}",
                     statusCode: StatusCodes.Status500InternalServerError,
                     title: Errors.UpdateBookmarksError,
                     instance: HttpContext.Request.Path);

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatSnackBar } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { flatMap, map, switchMap } from 'rxjs/operators';
-import { BookmarkModel } from 'src/app/shared/models/bookmarks.model';
+import { BookmarkModel, BoomarkSortOrderModel } from 'src/app/shared/models/bookmarks.model';
 import { ProblemDetail } from 'src/app/shared/models/error.problemdetail';
 import { ApplicationState } from 'src/app/shared/service/application.state';
 import { MessageUtils } from 'src/app/shared/utils/message.utils';
@@ -342,7 +342,15 @@ export class HomeComponent implements OnInit {
     let oldBookmarkList = [...this.bookmarks]; // clone the array
     moveItemInArray(this.bookmarks, event.previousIndex, event.currentIndex);
 
-    this.bookmarksService.updateBookmark(selectedItem).subscribe(
+    const sortOrderModel = new BoomarkSortOrderModel();
+    sortOrderModel.ids = [];
+    sortOrderModel.sortOrder = [];
+    this.bookmarks.forEach((e,index) => {
+      sortOrderModel.ids.push(e.id);
+      sortOrderModel.sortOrder.push(index);
+    });
+
+    this.bookmarksService.updateBookmarksSortOrder(sortOrderModel).subscribe(
       data => {
         this.state.setProgress(false);
         if (!data.success) {
