@@ -1,3 +1,4 @@
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatSnackBar } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -310,6 +311,57 @@ export class HomeComponent implements OnInit {
     } else {
       console.log('cannot change path - invalid!');
     }
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    if (event.previousIndex == event.currentIndex) {
+      return;
+    }
+
+    console.log(`move items in list from ${event.previousIndex} to ${event.currentIndex}.`);
+    let selectedItem = this.bookmarks[event.previousIndex];
+    let targetItem = this.bookmarks[event.currentIndex];
+
+    // get the sortOrder of the target-element
+    let sortOrder = targetItem.sortOrder;
+
+    if (event.currentIndex > event.previousIndex) {
+      // put it "after" the selected item
+      sortOrder += 1;
+      selectedItem.sortOrder = sortOrder;
+    } else {
+      // we want to put the item "in front" of this item
+      sortOrder -= 1;
+      selectedItem.sortOrder = sortOrder;
+    }
+
+    // we have the new sort-order of the selected item
+    // update the sort-order of the item in the backend
+
+    // swap in UI (faster)
+    let oldBookmarkList = [...this.bookmarks]; // clone the array
+    moveItemInArray(this.bookmarks, event.previousIndex, event.currentIndex);
+
+    this.bookmarksService.updateBookmark(selectedItem).subscribe(
+      data => {
+        this.state.setProgress(false);
+        if (!data.success) {
+          console.log('could not update sortOrder server-side - restore to previous');
+          this.bookmarks = oldBookmarkList;
+          new MessageUtils().showError(this.snackBar, 'could not update the bookmarks sort-order!');
+        }
+      },
+      error => {
+        // an error occured - we could not update the bookmarks server-side
+        // restore the old behavior
+        this.bookmarks = oldBookmarkList;
+        const errorDetail: ProblemDetail = error;
+        this.state.setProgress(false);
+        console.log(errorDetail);
+        new MessageUtils().showError(this.snackBar, errorDetail.detail);
+      }
+    );
+
   }
 
   private splitPathElements(path: string) : string[] {

@@ -271,21 +271,21 @@ namespace Store
         public async Task<List<BookmarkEntity>> GetAllBookmarks(string username)
         {
             var q = from b in _context.Bookmarks where b.UserName.ToLower() == username.ToLower() select b;
-            q = q.OrderByDescending(b => b.Type).ThenBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
+            q = q.OrderBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
             return await q.ToListAsync();
         }
 
         public async Task<List<BookmarkEntity>> GetBookmarksByName(string name, string username)
         {
             var q = from b in _context.Bookmarks where b.UserName.ToLower() == username.ToLower() && b.DisplayName.ToLower().Contains(name.ToLower()) select b;
-            q = q.OrderByDescending(b => b.Type).ThenBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
+            q = q.OrderBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
             return await q.ToListAsync();
         }
 
         public async Task<List<BookmarkEntity>> GetBookmarksByPath(string path, string username)
         {
             var q = from b in _context.Bookmarks where b.UserName.ToLower() == username.ToLower() && b.Path == path select b;
-            q = q.OrderByDescending(b => b.Type).ThenBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
+            q = q.OrderBy(b => b.SortOrder).ThenBy(b => b.DisplayName);
             return await q.ToListAsync();
         }
 
