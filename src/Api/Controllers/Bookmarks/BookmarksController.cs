@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
+using HtmlAgilityPack;
 
 namespace Api.Controllers.Bookmarks
 {
@@ -608,8 +609,20 @@ namespace Api.Controllers.Bookmarks
                     return;
                 }
 
-                // also update the favicon
-                var payload = await DownloadFavicon(_clientFactory.CreateClient(), url);
+                var httpClient = _clientFactory.CreateClient();
+                var favicon = "";
+                var filename = "";
+                (favicon, filename) = await ParseHTMLForFavicon(httpClient, url);
+                if (string.IsNullOrEmpty(favicon))
+                {
+                    favicon = FaviconSiteUrl(url);
+                    filename = $"{bookmark.Id}.ico";
+                }
+
+                // combine icon with bookmark id
+                filename = bookmark.Id + "_" + filename;
+
+                var payload = await DownloadFavicon(httpClient, favicon);
                 if (payload != null && payload.Length > 0)
                 {
                     _logger.LogDebug($"got a favicon payload of length '{payload.Length}' for url '{url}'");
@@ -617,13 +630,14 @@ namespace Api.Controllers.Bookmarks
                     var rootPath = _webHostEnv.ContentRootPath;
                     var iconPath = _faviconSettings.StoragePath;
                     var storagePath = Path.Combine(rootPath, iconPath);
-                    var path = Path.Combine(storagePath, $"{bookmark.Id}.ico");
+                    var path = Path.Combine(storagePath, filename);
                     await System.IO.File.WriteAllBytesAsync(path, payload);
                     if (System.IO.File.Exists(path))
                     {
+                        // also update the favicon
                         await repository!.InUnitOfWorkAsync<bool>(async () => {
                             var bm = bookmark;
-                            bm.Favicon = $"{bookmark.Id}.ico";
+                            bm.Favicon = filename;
                             var updated = await repository.Update(bm);
                             return updated != null ? (true, true) : (false, false);
                         });
@@ -640,14 +654,9 @@ namespace Api.Controllers.Bookmarks
             }
         }
 
-        async Task<byte[]> DownloadFavicon(HttpClient client, string domain)
+
+        async Task<byte[]> DownloadFavicon(HttpClient client, string url)
         {
-            // parse the url
-            var baseUrl = new Uri(domain);
-
-            // attempt: get favicon directly
-            var url = $"{baseUrl.Scheme}://{baseUrl.Host}/favicon.ico";
-
             _logger.LogDebug($"Will try to fetch favicon using url '{url}'.");
 
             var response = await client.GetAsync(url);
@@ -657,6 +666,73 @@ namespace Api.Controllers.Bookmarks
             }
             return new byte[0];
         }
+
+        string FaviconSiteUrl(string domain)
+        {
+            var baseUrl = new Uri(domain);
+            var url = $"{baseUrl.Scheme}://{baseUrl.Host}/favicon.ico";
+
+            return url;
+        }
+
+        async Task<(string url, string filename)> ParseHTMLForFavicon(HttpClient client, string domain)
+        {
+            // parse the url
+            var baseUrl = new Uri(domain);
+            var url = $"{baseUrl.Scheme}://{baseUrl.Host}";
+
+            var response = await client.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                if (!string.IsNullOrEmpty(content))
+                {
+                    HtmlDocument page = new HtmlDocument();
+                    page.LoadHtml(content);
+                    var filename = "";
+                    var favicon = GetFaviconFromPage(page, "icon");
+                    if (string.IsNullOrEmpty(favicon))
+                        favicon = GetFaviconFromPage(page, "shortcut icon");
+
+                    if (!string.IsNullOrEmpty(favicon))
+                    {
+                        _logger.LogInformation($"Got favicon '{favicon}'");
+                        // get the filename of the favicon
+                        var parts = favicon.Split("/", StringSplitOptions.RemoveEmptyEntries);
+                        if (parts != null && parts.Length > 0)
+                        {
+                            filename = parts[parts.Length-1];
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"Could not get favicon");
+                    }
+                    return (favicon, filename);
+                }
+                else
+                {
+                    _logger.LogWarning($"Could not get content of domain '{domain}'");
+                }
+            }
+            else
+            {
+                _logger.LogWarning($"No result from url '{domain}'");
+            }
+            return ("", "");
+        }
+
+        string GetFaviconFromPage(HtmlDocument document, string match)
+        {
+            var el = document.DocumentNode.SelectSingleNode($"/html/head/link[@rel='{match}' and @href]");
+            if (el != null)
+            {
+                return el.Attributes["href"].Value;
+            }
+            return "";
+        }
+
+
 
         /// <summary>
         /// get the favicon of a bookmark URL
