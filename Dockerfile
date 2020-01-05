@@ -23,7 +23,7 @@ LABEL description="Manage bookmarks independent of browsers."
 LABEL version=1
 
 WORKDIR /opt/bookmarks.binggl.net
-RUN mkdir -p /opt/bookmarks.binggl.net/_logs
+RUN mkdir -p /opt/bookmarks.binggl.net/_logs && mkdir -p /opt/bookmarks.binggl.net/_icons
 
 ## copy assets and build results from prior steps
 COPY --from=BACKEND-BUILD /backend-build/output /opt/bookmarks.binggl.net/
