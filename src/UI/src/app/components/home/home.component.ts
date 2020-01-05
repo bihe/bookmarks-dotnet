@@ -398,7 +398,7 @@ export class HomeComponent implements OnInit {
     if (url) {
       console.log(`url ${url} dropped!`);
       if (!url.startsWith('http')) {
-        url = 'http://' + url; // chrome does not willingly provide the scheme
+        url = 'https://' + url; // chrome does not willingly provide the scheme
       }
       this.addBookmark(url);
     }

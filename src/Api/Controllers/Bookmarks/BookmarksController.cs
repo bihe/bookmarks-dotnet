@@ -309,7 +309,8 @@ namespace Api.Controllers.Bookmarks
                         Type = existing.Type, // it does not make any sense to change the type of a bookmark!
                         Url = bookmark.Url,
                         UserName = user.Username,
-                        ChildCount = childCount
+                        ChildCount = childCount,
+                        Favicon = bookmark.Favicon
                     });
 
                     if (existing.Type == Store.ItemType.Folder && existingDisplayName != bookmark.DisplayName)
