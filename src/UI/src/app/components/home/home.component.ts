@@ -161,7 +161,9 @@ export class HomeComponent implements OnInit {
           console.log('dialog was closed');
           if (data.result) {
             let bookmark:BookmarkModel = data.model;
-            bookmark.favicon = '';
+            if (typeof bookmark.favicon === 'undefined' || bookmark.favicon === null) {
+              bookmark.favicon = '';
+            }
             console.log(bookmark);
 
             // update the UI immediately!
@@ -395,6 +397,9 @@ export class HomeComponent implements OnInit {
     let url = ev.dataTransfer.getData('text');
     if (url) {
       console.log(`url ${url} dropped!`);
+      if (!url.startsWith('http')) {
+        url = 'http://' + url; // chrome does not willingly provide the scheme
+      }
       this.addBookmark(url);
     }
   }
