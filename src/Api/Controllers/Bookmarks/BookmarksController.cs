@@ -571,10 +571,12 @@ namespace Api.Controllers.Bookmarks
 
                     if (_clientFactory != null)
                     {
-                        // fire&forget, run this in background and do not wait for the result
-                        _ = FetchFavicon(bookmark,  url);
+                        if (string.IsNullOrEmpty(bookmark.Favicon))
+                        {
+                            // fire&forget, run this in background and do not wait for the result
+                            _ = FetchFavicon(bookmark,  url);
+                        }
                     }
-
                     return (true, result);
                 });
 
