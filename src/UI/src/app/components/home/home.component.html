@@ -1,8 +1,14 @@
 <div class="bookmarks_content">
 
-    <div class="bookmarks_breadcrumb">
+    <div class="bookmarks_breadcrumb"
+        (drop)="doDropText($event)"
+        (dragover)="dragEnter($event, true)"
+        (dragleave)="dragEnter($event, false)"
 
-      <div class="boomkark_breadcramub_standard" *ngIf="changePath === false">
+        [ngClass]="highlightDropZone ? 'drop_highlight' : 'drop_highlight_not'"
+    >
+
+      <div *ngIf="changePath === false">
 
         <i class="d-none d-sm-inline fa fa-lock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(true)"></i>
         <i class="d-inline d-sm-none fa fa-lock fa-2x bookmark_path_edit_action" aria-hidden="true" (click)="editMode(true)"></i>
@@ -35,7 +41,7 @@
 
       </div>
 
-      <div class="boomkark_breadcramub_standard" *ngIf="changePath === true">
+      <div *ngIf="changePath === true">
 
         <i class="d-none d-sm-inline fa fa-unlock bookmark_path_edit_action" aria-hidden="true" (click)="editMode(false)"></i>
         <i class="d-inline d-sm-none fa fa-unlock fa-2x bookmark_path_edit_action" aria-hidden="true" (click)="editMode(false)"></i>
@@ -67,9 +73,10 @@
 
     </div>
 
+    <div class="bookmarks_list" cdkDropList (cdkDropListDropped)="drop($event)"
 
 
-    <div class="bookmarks_list" cdkDropList (cdkDropListDropped)="drop($event)" >
+    >
 
       <div class="bookmark_item" *ngIf="bookmarks.length === 0">
         <i>no entries available</i>

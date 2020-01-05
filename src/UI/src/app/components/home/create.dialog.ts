@@ -25,6 +25,19 @@ export class CreateBookmarksDialog implements OnInit {
     } else {
       this.bookmark = new BookmarkModel();
       this.bookmark.id = '';
+      this.bookmark.url = this.data.url;
+      if (this.bookmark.url && this.bookmark.url !== null && this.bookmark.url !== '') {
+        try {
+          const url = new URL(this.bookmark.url);
+          let cleansedUrl = url.hostname;
+          if (cleansedUrl && cleansedUrl !== '') {
+            cleansedUrl = cleansedUrl.replace('www.', '');
+            this.bookmark.displayName = cleansedUrl;
+          }
+        } catch (ex) {
+          console.log('could not get hostname for simplification! ' + ex);
+        }
+      }
       this.type = ItemType.Node.toString();
     }
     this.selectedPath = this.data.currentPath;

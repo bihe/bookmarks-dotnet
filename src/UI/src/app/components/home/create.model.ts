@@ -4,4 +4,5 @@ export interface CreateBookmarkModel {
   currentPath: string;
   absolutePaths: string[];
   existingBookmark: BookmarkModel;
+  url: string;
 }

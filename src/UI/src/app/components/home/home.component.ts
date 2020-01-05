@@ -28,7 +28,7 @@ export class HomeComponent implements OnInit {
   searchMode: boolean = false;
   changePath: boolean = false;
   pathInput: string = '';
-
+  highlightDropZone: boolean = false;
 
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
@@ -161,6 +161,7 @@ export class HomeComponent implements OnInit {
           console.log('dialog was closed');
           if (data.result) {
             let bookmark:BookmarkModel = data.model;
+            bookmark.favicon = '';
             console.log(bookmark);
 
             // update the UI immediately!
@@ -203,13 +204,14 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  addBookmark() {
+  addBookmark(url: string) {
     console.log('add bookmark!');
     const dialogRef = this.dialog.open(CreateBookmarksDialog, {
       panelClass: 'my-full-screen-dialog',
       data: {
         absolutePaths: this.absolutePaths,
-        currentPath: this.currentPath
+        currentPath: this.currentPath,
+        url: url
       }
     });
 
@@ -217,6 +219,7 @@ export class HomeComponent implements OnInit {
       console.log('dialog was closed');
       if (data.result) {
         let bookmark:BookmarkModel = data.model;
+        bookmark.favicon = '';
         console.log(bookmark);
 
         this.bookmarksService.createBookmark(bookmark).subscribe(
@@ -379,6 +382,21 @@ export class HomeComponent implements OnInit {
 
   customFavicon(id: string): string {
     return `/api/v1/bookmarks/favicon/${id}`;
+  }
+
+  dragEnter(ev: any, highlight: boolean) {
+    ev.preventDefault();
+    this.highlightDropZone = highlight;
+  }
+
+  doDropText(ev: any) {
+    ev.preventDefault();
+    this.highlightDropZone = false;
+    let url = ev.dataTransfer.getData('text');
+    if (url) {
+      console.log(`url ${url} dropped!`);
+      this.addBookmark(url);
+    }
   }
 
   private splitPathElements(path: string) : string[] {
