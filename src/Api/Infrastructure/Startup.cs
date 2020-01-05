@@ -34,6 +34,9 @@ namespace Api.Infrastructure
             services.Configure<JwtSettings>(jwtSection);
             var jwtSettings = jwtSection.Get<JwtSettings>();
 
+            var faviconSection = Configuration.GetSection("Favicon");
+            services.Configure<FaviconSettings>(faviconSection);
+
             // sloppy workaround to prevent mysql db connection in testing-scenarios
             if (CurrentEnvironment.EnvironmentName != "Testing")
             {
@@ -57,6 +60,8 @@ namespace Api.Infrastructure
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
+            services.AddHttpClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

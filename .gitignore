@@ -339,3 +339,4 @@ dist/
 lcov.info
 
 src/Api/wwwroot/ui/
+src/Api/_icons/

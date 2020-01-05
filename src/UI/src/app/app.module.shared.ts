@@ -2,6 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NgModule } from '@angular/core';
 import { MatBadgeModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatMenuModule, MatOptionModule, MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSnackBarModule, MatTooltipModule } from '@angular/material';
 import { MatButtonModule } from '@angular/material/button';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { AppComponent } from './components/app/app.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -32,7 +33,8 @@ export const sharedConfig: NgModule = {
         ConfirmDialogComponent
     ],
     imports: [
-        AppMaterialModule
+        AppMaterialModule,
+        LazyLoadImageModule
     ],
     providers: [ ApplicationState, ApiAppInfoService, ApiBookmarksService ],
     entryComponents: [ CreateBookmarksDialog, ConfirmDialogComponent ]

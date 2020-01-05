@@ -21,6 +21,7 @@ namespace Store
         public DateTime? Modified { get; set; }
         public int ChildCount { get; set; } = 0;
         public int AccessCount { get; set; } = 0;
+        public string Favicon { get; set; }
 
         public override string ToString()
         {

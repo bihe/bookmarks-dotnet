@@ -145,6 +145,7 @@ namespace Store
             bm.Url = item.Url;
             bm.ChildCount = item.ChildCount;
             bm.AccessCount = item.AccessCount;
+            bm.Favicon = item.Favicon;
 
             // the properties Created, Type, UserName are not touched!
 

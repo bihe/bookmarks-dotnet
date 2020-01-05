@@ -45,12 +45,17 @@ namespace Bookmarks.Tests.Api.Controller
 
         ILogger<BookmarksController> Logger => Mock.Of<ILogger<BookmarksController>>();
 
+        BookmarksController CreateController(IBookmarkRepository repository)
+        {
+            return new BookmarksController(Logger, repository, null, null, null, null);
+        }
+
 
         [Fact]
         public async Task TestCreateBookmarks()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, _repo);
+            var controller = CreateController(_repo);
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -71,7 +76,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestCreateBookmarks_MissingValues()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, _repo);
+            var controller = CreateController(_repo);
             controller.ControllerContext = _fixtures.Context;
             var bookmark = BookMark;
             bookmark.Path = string.Empty;
@@ -100,9 +105,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestCreateBookmarks_Exception()
         {
             // Arrange
-            var repo = new MockDBRepoException();
-
-            var controller = new BookmarksController(Logger, repo);
+            var controller = CreateController(new MockDBRepoException());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -129,7 +132,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestGetBookmarks()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -160,7 +163,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestGetBookmarks_EmptyId()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -187,7 +190,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestGetBookmarks_NotFound()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -214,7 +217,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestUpdateBookmarks()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
             var bm = BookMark;
             bm.Id = "id";
@@ -243,7 +246,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestUpdateBookmarks_MissingId()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
             var bm = BookMark;
             bm.Id = "";
@@ -273,7 +276,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestUpdateBookmarks_Exception()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
             var bm = BookMark;
             bm.Id = "exception";
@@ -303,7 +306,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestUpdateBookmarks_RenameBug()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, _repo);
+            var controller = CreateController(_repo);
             controller.ControllerContext = _fixtures.Context;
 
             // 1) create a folder in root
@@ -377,7 +380,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestDeleteBookmarks()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -403,7 +406,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestDeleteBookmarks_MissingId()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -430,7 +433,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestDeleteBookmarks_Exception()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -457,7 +460,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFindBookmarksByPath()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -485,7 +488,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFindBookmarksByPath_NoResult()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -513,7 +516,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFindBookmarksByPath_MissingPath()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -540,7 +543,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFindBookmarksByName()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -568,7 +571,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFindBookmarksByName_NoResult()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -596,7 +599,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFindBookmarksByName_MissingName()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -623,7 +626,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestGetBookmarkFolderByPath()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -651,7 +654,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestGetBookmarkFolderByPath_IsRoot()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -679,7 +682,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestGetBookmarkFolderByPath_MissingPath()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -706,7 +709,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestGetBookmarkFolderByPath_NotFond()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -733,7 +736,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFetchAndForward()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -753,7 +756,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFetchAndForward_InvalidArgument()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -780,7 +783,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestFetchAndForward_Exception()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -818,7 +821,7 @@ namespace Bookmarks.Tests.Api.Controller
             }
 
             // Arrange
-            var controller = new BookmarksController(Logger, _CreateRepo());
+            var controller = CreateController(_CreateRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // 1) create 3 items
@@ -906,7 +909,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestUpdateSortOrder_MissingParameters()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -936,7 +939,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestUpdateSortOrder_UnbalancedParameters()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act
@@ -970,7 +973,7 @@ namespace Bookmarks.Tests.Api.Controller
         public async Task TestUpdateSortOrder_Exception()
         {
             // Arrange
-            var controller = new BookmarksController(Logger, new MockDbRepo());
+            var controller = CreateController(new MockDbRepo());
             controller.ControllerContext = _fixtures.Context;
 
             // Act

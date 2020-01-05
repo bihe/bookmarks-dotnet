@@ -29,6 +29,7 @@ export class HomeComponent implements OnInit {
   changePath: boolean = false;
   pathInput: string = '';
 
+
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
     public dialog: MatDialog,
@@ -370,6 +371,14 @@ export class HomeComponent implements OnInit {
       }
     );
 
+  }
+
+  get defaultFavicon(): string {
+    return 'assets/favicon.ico';
+  }
+
+  customFavicon(id: string): string {
+    return `/api/v1/bookmarks/favicon/${id}`;
   }
 
   private splitPathElements(path: string) : string[] {

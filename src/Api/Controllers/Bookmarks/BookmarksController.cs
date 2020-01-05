@@ -8,6 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Store;
 using System.Linq;
+using Microsoft.Extensions.Options;
+using Api.Infrastructure;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using System.Net.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Controllers.Bookmarks
 {
@@ -17,11 +23,22 @@ namespace Api.Controllers.Bookmarks
     {
         readonly ILogger<BookmarksController> _logger;
         readonly IBookmarkRepository _repository;
+        readonly FaviconSettings _faviconSettings;
+        readonly IWebHostEnvironment _webHostEnv;
+        readonly IHttpClientFactory _clientFactory;
+        readonly IServiceScopeFactory _servicesFactory;
 
-        public BookmarksController(ILogger<BookmarksController> logger, IBookmarkRepository repository)
+        public BookmarksController(ILogger<BookmarksController> logger, IBookmarkRepository repository,
+            IWebHostEnvironment env, IOptions<FaviconSettings> settings,
+            IHttpClientFactory clientFactory,
+            IServiceScopeFactory factory)
         {
             _logger = logger;
             _repository = repository;
+            _webHostEnv = env;
+            _faviconSettings = settings?.Value ?? new FaviconSettings();
+            _clientFactory = clientFactory;
+            _servicesFactory = factory;
         }
 
         /// <summary>
@@ -514,7 +531,7 @@ namespace Api.Controllers.Bookmarks
             }
 
             _logger.LogDebug($"Try to fetch bookmark by id '{id}'");
-
+            string url = "";
             try
             {
                 var outcome = await _repository.InUnitOfWorkAsync<ActionResult>(async () => {
@@ -547,8 +564,14 @@ namespace Api.Controllers.Bookmarks
                     var updated = await _repository.Update(bookmark);
 
                     _logger.LogInformation($"Updated Bookmark.AccessCount for ID {id}");
+                    url = bookmark.Url;
+                    var result = Redirect(url);
 
-                    var result = Redirect(bookmark.Url);
+                    if (_clientFactory != null)
+                    {
+                        // fire&forget, run this in background and do not wait for the result
+                        _ = FetchFavicon(bookmark,  url);
+                    }
 
                     return (true, result);
                 });
@@ -564,6 +587,125 @@ namespace Api.Controllers.Bookmarks
                     title: Errors.UpdateBookmarksError,
                     instance: HttpContext.Request.Path);
             }
+        }
+
+        async Task FetchFavicon(BookmarkEntity bookmark, string url)
+        {
+            try
+            {
+                if (_servicesFactory == null)
+                {
+                    _logger.LogWarning("No ServicesScopeFactory available!");
+                    return;
+                }
+
+                var scope = _servicesFactory.CreateScope();
+                var repository = scope.ServiceProvider.GetService(typeof(IBookmarkRepository)) as IBookmarkRepository;
+                if (repository == null)
+                {
+                    _logger.LogWarning("Unable to get a repository from ServicesScopeFactory!");
+                    return;
+                }
+
+                // also update the favicon
+                var payload = await DownloadFavicon(_clientFactory.CreateClient(), url);
+                if (payload != null && payload.Length > 0)
+                {
+                    _logger.LogDebug($"got a favicon payload of length '{payload.Length}' for url '{url}'");
+
+                    var rootPath = _webHostEnv.ContentRootPath;
+                    var iconPath = _faviconSettings.StoragePath;
+                    var storagePath = Path.Combine(rootPath, iconPath);
+                    var path = Path.Combine(storagePath, $"{bookmark.Id}.ico");
+                    await System.IO.File.WriteAllBytesAsync(path, payload);
+                    if (System.IO.File.Exists(path))
+                    {
+                        await repository!.InUnitOfWorkAsync<bool>(async () => {
+                            var bm = bookmark;
+                            bm.Favicon = $"{bookmark.Id}.ico";
+                            var updated = await repository.Update(bm);
+                            return updated != null ? (true, true) : (false, false);
+                        });
+                    }
+                }
+                else
+                {
+                    _logger.LogDebug($"No favicon payload for url '{url}'.");
+                }
+            }
+            catch(Exception EX)
+            {
+                _logger.LogError($"Error during favicon fetch/update: {EX.Message}; stack: {EX.StackTrace}");
+            }
+        }
+
+        async Task<byte[]> DownloadFavicon(HttpClient client, string domain)
+        {
+            // parse the url
+            var baseUrl = new Uri(domain);
+
+            // attempt: get favicon directly
+            var url = $"{baseUrl.Scheme}://{baseUrl.Host}/favicon.ico";
+
+            _logger.LogDebug($"Will try to fetch favicon using url '{url}'.");
+
+            var response = await client.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+            return new byte[0];
+        }
+
+        /// <summary>
+        /// get the favicon of a bookmark URL
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("favicon/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ResponseCache(Duration = 60)]
+        public async Task<ActionResult> GetFavicon(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return InvalidArguments( $"Invalid id supplid");
+            }
+
+            _logger.LogDebug($"Try to fetch bookmark by id '{id}'");
+
+            var rootPath = _webHostEnv.ContentRootPath;
+            var iconPath = _faviconSettings.StoragePath;
+
+            var user = this.User.Get();
+            var bookmark = await _repository.GetBookmarkById(id, user.Username);
+
+            if (bookmark != null && !string.IsNullOrEmpty(bookmark.Favicon))
+            {
+                iconPath = Path.Combine(iconPath, bookmark.Favicon);
+                if (!System.IO.File.Exists(iconPath))
+                {
+                    iconPath = _faviconSettings.DefaultFavicon; // default icon
+                }
+            }
+            else
+            {
+                iconPath = _faviconSettings.DefaultFavicon; // default icon
+            }
+            var path = Path.Combine(rootPath, iconPath);
+            if (!System.IO.File.Exists(path))
+            {
+                _logger.LogError($"Path of favicon does not exists: '{path}'");
+                return ProblemDetailsResult(
+                    detail: $"Could not get favicon!",
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: Errors.NotFoundError,
+                    instance: HttpContext.Request.Path);
+            }
+
+            return PhysicalFile(path, "image/x-icon");
         }
 
         List<BookmarkModel> ToModelList(List<BookmarkEntity> entities)
@@ -582,7 +724,8 @@ namespace Api.Controllers.Bookmarks
                 Path = entity.Path,
                 SortOrder = entity.SortOrder,
                 Type = entity.Type == Store.ItemType.Folder ? ItemType.Folder : ItemType.Node,
-                Url = entity.Url
+                Url = entity.Url,
+                Favicon = entity.Favicon
             };
         }
 
