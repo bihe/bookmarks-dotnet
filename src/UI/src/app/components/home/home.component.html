@@ -75,7 +75,7 @@
         <i>no entries available</i>
       </div>
 
-      <div cdkDrag class="bookmark_item" *ngFor="let item of bookmarks; let i = index" id="{{ item.id }}">
+      <div cdkDrag [cdkDragStartDelay]="600" class="bookmark_item" *ngFor="let item of bookmarks; let i = index" id="{{ item.id }}">
 
         <span class="bookmark_index">{{ i+1 }}</span>&nbsp;
 
