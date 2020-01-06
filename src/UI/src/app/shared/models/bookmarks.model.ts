@@ -14,6 +14,7 @@ export class BookmarkModel {
   public modified: Date;
   public childCount: number;
   public favicon: string;
+  public accessCount: number;
 }
 
 export class BoomarkSortOrderModel {

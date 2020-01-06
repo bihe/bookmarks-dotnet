@@ -809,17 +809,6 @@ namespace Bookmarks.Tests.Api.Controller
         [Fact]
         public async Task TestUpdateSortOrder()
         {
-            IBookmarkRepository _CreateRepo()
-            {
-                var ctxt = SetupDbContext(nameof(BookmarksControllerTests));
-                ctxt.Database.EnsureCreated();
-                ctxt.Bookmarks.RemoveRange(ctxt.Bookmarks);
-                ctxt.SaveChanges();
-
-                var logger = Mock.Of<ILogger<persistence.DbBookmarkRepository>>();
-                return new persistence.DbBookmarkRepository(ctxt, logger);
-            }
-
             // Arrange
             var controller = CreateController(_CreateRepo());
             controller.ControllerContext = _fixtures.Context;
@@ -1001,6 +990,66 @@ namespace Bookmarks.Tests.Api.Controller
             problem.Title
                 .Should()
                 .Be(Errors.UpdateBookmarksError);
+        }
+
+        [Fact]
+        public async Task TestGetMostVisited()
+        {
+            // Arrange
+            var controller = CreateController(_CreateRepo());
+            controller.ControllerContext = _fixtures.Context;
+
+            // 1) create 3 items
+            for(int i=0; i<3; i++)
+            {
+                var item = new BookmarkModel{
+                    Id = $"id{i}",
+                    DisplayName = $"item{i}",
+                    Path = "/",
+                    Type = global::Api.Controllers.Bookmarks.ItemType.Node,
+                    AccessCount = i*10
+                };
+                var r = await controller.Create(item);
+                var c = r.As<CreatedResult>();
+                c.StatusCode
+                    .Should()
+                    .Be((int)HttpStatusCode.Created);
+            }
+
+            // Act
+            var result = await controller.GetMostVisited(2);
+
+            // Assert
+            result
+                .Should()
+                .NotBeNull();
+            var ok = result.As<OkObjectResult>();
+            ok.StatusCode
+                .Should()
+                .Be((int)HttpStatusCode.OK);
+            var bm = ok.Value.As<ListResult<List<BookmarkModel>>>();
+
+            bm.Success
+                .Should()
+                .Be(true);
+            bm.Value.Count
+                .Should()
+                .Be(2);
+            bm.Value[0].DisplayName
+                .Should()
+                .Be("item2");
+        }
+
+
+        IBookmarkRepository _CreateRepo()
+        {
+            var ctxt = SetupDbContext(nameof(BookmarksControllerTests));
+            ctxt.Database.EnsureCreated();
+            ctxt.Bookmarks.RemoveRange(ctxt.Bookmarks);
+            ctxt.SaveChanges();
+
+            var logger = Mock.Of<ILogger<persistence.DbBookmarkRepository>>();
+            return new persistence.DbBookmarkRepository(ctxt, logger);
         }
 
     }

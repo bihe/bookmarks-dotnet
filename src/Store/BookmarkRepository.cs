@@ -21,6 +21,7 @@ namespace Store
         Task<List<BookmarkEntity>> GetBookmarksByPathStart(string startPath, string username);
         Task<List<BookmarkEntity>> GetBookmarksByName(string name, string username);
         Task<List<NodeCount>> GetChildCountOfPath(string path, string username);
+        Task<List<BookmarkEntity>> GetMostRecentBookmarks(string username, int limit);
 
         Task<BookmarkEntity> GetFolderByPath(string path, string username);
         Task<BookmarkEntity> GetBookmarkById(string id, string username);
@@ -296,6 +297,20 @@ namespace Store
             if (nodes == null || !nodes.Any())
                 return new List<NodeCount>();
             return nodes.ToList();
+        }
+
+        public async Task<List<BookmarkEntity>> GetMostRecentBookmarks(string username, int limit)
+        {
+            var q = from b in _context.Bookmarks where
+                b.UserName.ToLower() == username.ToLower() &&
+                b.Type == ItemType.Node &&
+                b.AccessCount > 0
+                select b;
+            q = q.OrderByDescending(b => b.AccessCount).ThenBy(b => b.DisplayName);
+            q = q.Take(limit);
+            if (!await q.AnyAsync())
+                return new List<BookmarkEntity>();
+            return await q.ToListAsync();
         }
 
         // internal logic && helpers

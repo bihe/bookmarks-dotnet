@@ -66,5 +66,10 @@ namespace Bookmarks.Tests.Api.Controller
         {
             throw new NotImplementedException();
         }
+
+        public virtual Task<List<BookmarkEntity>> GetMostRecentBookmarks(string username, int limit)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

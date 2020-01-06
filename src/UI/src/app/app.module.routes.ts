@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, UrlMatchResult, UrlSegment } from '@angular/router';
+import { DashBoardComponent } from './components/dashboard/dashboard.component';
 import { HomeComponent } from './components/home/home.component';
 
 // custom matcher
@@ -40,6 +41,7 @@ const routes: Routes = [
   { path: '', redirectTo: 'start', pathMatch: 'full' },
   { matcher: matchStartAndSubPath, component: HomeComponent },
   { path: 'start', component: HomeComponent },
+  { path: 'dashboard', component: DashBoardComponent },
   { path: '**', redirectTo: 'start', }
 ];
 

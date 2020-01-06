@@ -42,6 +42,15 @@ export class ApiBookmarksService extends BaseDataService {
       );
   }
 
+  getMostVisitedBookmarks(num: number): Observable<ListResult<BookmarkModel[]>> {
+    const url = `${this.BASE_URL}/mostvisited/${num}`;
+    return this.http.get<ListResult<BookmarkModel[]>>(url, this.RequestOptions)
+      .pipe(
+        timeout(this.RequestTimeOutDefault),
+        catchError(this.handleError)
+      );
+  }
+
   fetchBookmarkById(id: string): Observable<BookmarkModel> {
     const url = `${this.BASE_URL}/${id}`;
     return this.http.get<BookmarkModel>(url, this.RequestOptions)

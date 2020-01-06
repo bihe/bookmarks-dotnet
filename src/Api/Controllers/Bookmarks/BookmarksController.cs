@@ -224,6 +224,8 @@ namespace Api.Controllers.Bookmarks
                         Type = bookmark.Type == ItemType.Node ? Store.ItemType.Node : Store.ItemType.Folder,
                         Url = bookmark.Url,
                         UserName = user.Username,
+                        Favicon = bookmark.Favicon,
+                        AccessCount = bookmark.AccessCount
                     });
                     return (true, entity);
                 });
@@ -311,7 +313,8 @@ namespace Api.Controllers.Bookmarks
                         Url = bookmark.Url,
                         UserName = user.Username,
                         ChildCount = childCount,
-                        Favicon = bookmark.Favicon
+                        Favicon = bookmark.Favicon,
+                        AccessCount = bookmark.AccessCount
                     });
 
                     if (existing.Type == Store.ItemType.Folder && existingDisplayName != bookmark.DisplayName)
@@ -692,6 +695,26 @@ namespace Api.Controllers.Bookmarks
             return PhysicalFile(path, "image/x-icon");
         }
 
+        [HttpGet]
+        [Route("mostvisited/{num}")]
+        [ProducesResponseType(typeof(ListResult<List<BookmarkModel>>),StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetMostVisited(int num)
+        {
+            _logger.LogDebug($"Get the most recent, most often visited bookmarks'");
+
+            if (num < 1)
+                num = 1000;
+
+            var user = this.User.Get();
+            var bookmarks = await _repository.GetMostRecentBookmarks(user.Username, num);
+            return Ok(new ListResult<List<BookmarkModel>>{
+                Success = true,
+                Value = ToModelList(bookmarks),
+                Count = bookmarks.Count,
+                Message = $"Found {bookmarks.Count} items."
+            });
+        }
+
         List<BookmarkModel> ToModelList(List<BookmarkEntity> entities)
         {
             return entities.Select(x => ToModel(x)).ToList();
@@ -709,7 +732,8 @@ namespace Api.Controllers.Bookmarks
                 SortOrder = entity.SortOrder,
                 Type = entity.Type == Store.ItemType.Folder ? ItemType.Folder : ItemType.Node,
                 Url = entity.Url,
-                Favicon = entity.Favicon
+                Favicon = entity.Favicon,
+                AccessCount = entity.AccessCount
             };
         }
 

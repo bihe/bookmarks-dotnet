@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Bookmarks.Tests.Store.Fixtures;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Store;
@@ -422,6 +423,55 @@ namespace Bookmarks.Tests.Store
 
             bm = await repo.GetBookmarkById(itemId, Username);
             Assert.NotNull(bm);
+        }
+
+        [Fact]
+        public async Task TestMostAccessedBookmarks()
+        {
+            Assert.NotNull(context);
+
+            for(int i=0; i<3; i++)
+            {
+                await repo.Create(new BookmarkEntity{
+                    ChildCount = 0,
+                    Created = DateTime.UtcNow,
+                    DisplayName = $"displayName{i}",
+                    Path = "/",
+                    SortOrder = i,
+                    Type = ItemType.Node,
+                    Url = "http://url",
+                    UserName = Username,
+                    AccessCount = i*10
+                });
+            }
+
+            var bookmarks = await repo.GetMostRecentBookmarks(Username,2);
+            bookmarks
+                .Should().NotBeNull();
+            bookmarks.Count
+                .Should().Be(2);
+            bookmarks[0].DisplayName
+                .Should().Be("displayName2");
+            bookmarks[1].DisplayName
+                .Should().Be("displayName1");
+
+            bookmarks = await repo.GetMostRecentBookmarks(Username,1);
+            bookmarks
+                .Should().NotBeNull();
+            bookmarks.Count
+                .Should().Be(1);
+            bookmarks[0].DisplayName
+                .Should().Be("displayName2");
+
+            bookmarks = await repo.GetMostRecentBookmarks(Username,99);
+            bookmarks
+                .Should().NotBeNull();
+            bookmarks.Count
+                .Should().Be(2);
+            bookmarks[0].DisplayName
+                .Should().Be("displayName2");
+            bookmarks[1].DisplayName
+                .Should().Be("displayName1");
         }
     }
 }

@@ -22,6 +22,8 @@ namespace Api.Controllers.Bookmarks
         public DateTime? Modified { get; set; }
         public int ChildCount { get; set; } = 0;
         public string Favicon { get; set; } = string.Empty;
+        public int AccessCount { get; set; } = 0;
+
 
         public override string ToString()
         {
