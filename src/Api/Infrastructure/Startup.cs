@@ -13,6 +13,7 @@ using System.IO;
 using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Api.Favicon;
 
 namespace Api.Infrastructure
 {
@@ -61,7 +62,7 @@ namespace Api.Infrastructure
                 c.IncludeXmlComments(xmlPath);
             });
 
-            services.AddHttpClient();
+            services.AddSingleton<IconFetcher>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

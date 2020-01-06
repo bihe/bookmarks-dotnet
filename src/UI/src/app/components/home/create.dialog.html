@@ -24,6 +24,11 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
+
+      <section *ngIf="type !== 'Folder'">
+        <mat-checkbox class="dialog-form-input" name="refreshFavicon" [(ngModel)]="reloadFavicon">Re-fetch Favicon</mat-checkbox>
+      </section>
+
       <div mat-dialog-actions class="create_bookmark_layout">
         <button mat-raised-button (click)="onNoClick()">Cancel</button>
         <button mat-raised-button color="primary"
