@@ -14,13 +14,18 @@ COPY ./src/Store ./src/Store
 COPY ./Directory.Build.props .
 COPY ./Directory.Build.targets .
 COPY ./global.json .
-RUN dotnet publish --self-contained -r linux-musl-x64 -c Release -v m -o output ./src/Api/Api.csproj
+RUN dotnet publish --self-contained true -r alpine-x64 -c Release /p:PublishTrimmed=true -v m -o output ./src/Api/Api.csproj
 
 ## runtime build
-FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine
+#FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine
+FROM alpine:3
+
 LABEL author="henrik@binggl.net"
 LABEL description="Manage bookmarks independent of browsers."
 LABEL version=1
+
+# Add some libs required by .NET runtime
+RUN apk add --no-cache libstdc++ libintl
 
 WORKDIR /opt/bookmarks.binggl.net
 RUN mkdir -p /opt/bookmarks.binggl.net/_logs && mkdir -p /opt/bookmarks.binggl.net/_icons
@@ -32,6 +37,7 @@ COPY --from=FRONTEND-BUILD /fronted-build/dist/bookmarks-ui /opt/bookmarks.bingg
 EXPOSE 3000
 ENV ASPNETCORE_ENVIRONMENT Production
 ENV ASPNETCORE_URLS http://*:3000
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT 1
 
 # Do not run as root user
 ## alpine specific user/group creation
