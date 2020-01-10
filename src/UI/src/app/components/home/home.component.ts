@@ -1,6 +1,7 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatSnackBar } from '@angular/material';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { flatMap, map, switchMap } from 'rxjs/operators';
 import { BookmarkModel, BoomarkSortOrderModel } from 'src/app/shared/models/bookmarks.model';
@@ -35,7 +36,8 @@ export class HomeComponent implements OnInit {
     public dialog: MatDialog,
     private state: ApplicationState,
     private router: Router,
-    private activeRoute: ActivatedRoute
+    private activeRoute: ActivatedRoute,
+    private titleService: Title
   ) {}
 
   ngOnInit() {
@@ -59,6 +61,12 @@ export class HomeComponent implements OnInit {
         switchMap(folderResult => {
           // if we have received a folder, we need to get the path!
           if (folderResult.success === true) {
+            if (folderResult.value.displayName === 'Root') {
+              this.titleService.setTitle('Bookmarks');
+            } else {
+              this.titleService.setTitle(folderResult.value.displayName);
+            }
+
             let path = folderResult.value.path;
             if (!path.endsWith('/')) {
               path += '/';

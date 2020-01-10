@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
+import { Title } from '@angular/platform-browser';
 import { BookmarkModel } from 'src/app/shared/models/bookmarks.model';
 import { ApiBookmarksService } from 'src/app/shared/service/api.bookmarks.service';
 import { ApplicationState } from 'src/app/shared/service/application.state';
@@ -15,15 +16,18 @@ export class DashBoardComponent implements OnInit {
   bookmarks: BookmarkModel[] = [];
   isUser: boolean = true;
   isAdmin: boolean = false;
+  readonly MaxDashboardEntries = 20;
 
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
     private state: ApplicationState,
+    private titleService: Title
   ) {}
 
   ngOnInit() {
+    this.titleService.setTitle('bookmarks.Dashboard');
     this.state.setProgress(true);
-    this.bookmarksService.getMostVisitedBookmarks(10)
+    this.bookmarksService.getMostVisitedBookmarks(this.MaxDashboardEntries)
       .subscribe(
         data => {
           console.log(data);

@@ -2,6 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NgModule } from '@angular/core';
 import { MatBadgeModule, MatCardModule, MatCheckboxModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatMenuModule, MatOptionModule, MatProgressSpinnerModule, MatRadioModule, MatSelectModule, MatSnackBarModule, MatTooltipModule } from '@angular/material';
 import { MatButtonModule } from '@angular/material/button';
+import { Title } from '@angular/platform-browser';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { AppComponent } from './components/app/app.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
@@ -26,20 +27,25 @@ export class AppMaterialModule { }
 export const sharedConfig: NgModule = {
     bootstrap: [ AppComponent ],
     declarations: [
-        AppComponent,
-        HomeComponent,
-        FooterComponent,
-        HeaderComponent,
-        EllipsisPipe,
-        DateFormatPipe,
-        CreateBookmarksDialog,
-        ConfirmDialogComponent,
-        DashBoardComponent
+      AppComponent,
+      HomeComponent,
+      FooterComponent,
+      HeaderComponent,
+      EllipsisPipe,
+      DateFormatPipe,
+      CreateBookmarksDialog,
+      ConfirmDialogComponent,
+      DashBoardComponent
     ],
     imports: [
-        AppMaterialModule,
-        LazyLoadImageModule
+      AppMaterialModule,
+      LazyLoadImageModule
     ],
-    providers: [ ApplicationState, ApiAppInfoService, ApiBookmarksService ],
+    providers: [
+      ApplicationState,
+      ApiAppInfoService,
+      ApiBookmarksService,
+      Title
+    ],
     entryComponents: [ CreateBookmarksDialog, ConfirmDialogComponent ]
 };
