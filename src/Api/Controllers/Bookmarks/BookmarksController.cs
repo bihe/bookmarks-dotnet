@@ -12,9 +12,7 @@ using Microsoft.Extensions.Options;
 using Api.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
-using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
-using HtmlAgilityPack;
 using Api.Favicon;
 
 namespace Api.Controllers.Bookmarks
