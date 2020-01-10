@@ -17,7 +17,6 @@ COPY ./global.json .
 RUN dotnet publish --self-contained true -r alpine-x64 -c Release /p:PublishTrimmed=true -v m -o output ./src/Api/Api.csproj
 
 ## runtime build
-#FROM mcr.microsoft.com/dotnet/core/runtime-deps:3.1-alpine
 FROM alpine:3
 
 LABEL author="henrik@binggl.net"
@@ -27,12 +26,12 @@ LABEL version=1
 # Add some libs required by .NET runtime
 RUN apk add --no-cache libstdc++ libintl
 
-WORKDIR /opt/bookmarks.binggl.net
-RUN mkdir -p /opt/bookmarks.binggl.net/_logs && mkdir -p /opt/bookmarks.binggl.net/_icons
+WORKDIR /opt/bookmarks
+RUN mkdir -p /opt/bookmarks/_logs && mkdir -p /opt/bookmarks/_icons
 
 ## copy assets and build results from prior steps
-COPY --from=BACKEND-BUILD /backend-build/output /opt/bookmarks.binggl.net/
-COPY --from=FRONTEND-BUILD /fronted-build/dist/bookmarks-ui /opt/bookmarks.binggl.net/wwwroot/ui
+COPY --from=BACKEND-BUILD /backend-build/output /opt/bookmarks/
+COPY --from=FRONTEND-BUILD /fronted-build/dist/bookmarks-ui /opt/bookmarks/wwwroot/ui
 
 EXPOSE 3000
 ENV ASPNETCORE_ENVIRONMENT Production
@@ -44,7 +43,7 @@ ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT 1
 RUN addgroup -g 1000 -S bookmarks && \
     adduser -u 1000 -S bookmarks -G bookmarks
 
-RUN chown -R bookmarks:bookmarks /opt/bookmarks.binggl.net
+RUN chown -R bookmarks:bookmarks /opt/bookmarks
 USER bookmarks
 
-CMD ["/opt/bookmarks.binggl.net/Api"]
+CMD ["/opt/bookmarks/Api"]
