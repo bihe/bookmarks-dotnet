@@ -5,6 +5,7 @@
 
 .dashboard_card {
   max-width: 400px;
+  min-width: 300px;
   display: inline-block;
   margin: 20px;
 }

@@ -108,6 +108,8 @@ a.bookmark_actions {
   font-weight: bold;
   color: #999999;
   font-size: 0.7em;
+  width: 10px;
+  display: inline-block;
 }
 
 .bookmark_path_info {
@@ -116,6 +118,7 @@ a.bookmark_actions {
   font-family: 'Source Code Pro', monospace;
   font-size: 1.2em;
   cursor: pointer;
+  margin-left: 10px;
 }
 
 .bookmark_path_info:hover {

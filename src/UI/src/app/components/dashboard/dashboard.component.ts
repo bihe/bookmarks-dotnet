@@ -16,7 +16,7 @@ export class DashBoardComponent implements OnInit {
   bookmarks: BookmarkModel[] = [];
   isUser: boolean = true;
   isAdmin: boolean = false;
-  readonly MaxDashboardEntries = 20;
+  readonly MaxDashboardEntries = 45;
 
   constructor(private bookmarksService: ApiBookmarksService,
     private snackBar: MatSnackBar,
