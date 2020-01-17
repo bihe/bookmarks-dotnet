@@ -7,14 +7,12 @@
     <mat-card-content>
       <img *ngIf="item.favicon === null || item.favicon === ''" src="assets/favicon.ico"
         class="bookmark_favicon"
-        loading="lazy"
         width="16px" height="16px"
         alt="favicon"/>
       <img *ngIf="item.favicon !== null && item.favicon !== ''"
         [defaultImage]="defaultFavicon"
         [lazyLoad]="customFavicon(item.id)"
         class="bookmark_favicon"
-        loading="lazy"
         width="16px" height="16px"
         alt="favicon"/>
       &nbsp;
